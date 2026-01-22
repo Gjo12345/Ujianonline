@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sistem Ujian Online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    /* Animated Gradient Background */
+    .animated-bg {
+      background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* Floating Shapes */
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.3;
+      animation: float 20s infinite;
+    }
+    
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      background: #fbbf24;
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+    
+    .shape-2 {
+      width: 250px;
+      height: 250px;
+      background: #ec4899;
+      bottom: -80px;
+      right: -80px;
+      animation-delay: 3s;
+    }
+    
+    .shape-3 {
+      width: 200px;
+      height: 200px;
+      background: #3b82f6;
+      top: 50%;
+      left: 50%;
+      animation-delay: 6s;
+    }
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      33% {
+        transform: translate(30px, -30px) rotate(120deg);
+      }
+      66% {
+        transform: translate(-20px, 20px) rotate(240deg);
+      }
+    }
+    
+    /* Glass Morphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Input Styling */
+    .input-wrapper {
+      position: relative;
+      overflow: visible;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      z-index: 10;
+      pointer-events: none;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .input-field {
+      transition: all 0.3s ease;
+    }
+    
+    .input-field:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+    
+    /* Button Animation */
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Logo Animation */
+    .logo-wrapper {
+      animation: fadeInDown 1s ease;
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Form Animation */
+    .form-container {
+      animation: fadeInUp 1s ease 0.2s both;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Ping Status */
+    .status-indicator {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Loading Spinner */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body class="animated-bg min-h-screen flex items-center justify-center p-4 relative">
+  
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  
+  <div class="w-full max-w-md relative z-10">
+    <div class="glass-card rounded-3xl p-8 shadow-2xl">
+      
+      <? if (config.logoUrl) { ?>
+      <div class="logo-wrapper flex justify-center mb-6">
+        <div class="relative">
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-xl opacity-50"></div>
+          <img src="<?= config.logoUrl ?>" 
+               alt="Logo Ujian Online"
+               class="h-24 w-auto relative z-10">
+        </div>
+      </div>
+      <? } ?>
+      
+      <? if (config.loginTitle || config.loginSubtitle) { ?>
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+          <?= config.loginTitle || '' ?>
+        </h2>
+        <p class="text-gray-600 text-sm"><?= config.loginSubtitle || '' ?></p>
+      </div>
+      <? } ?>
+      
+      <form id="loginForm" class="form-container space-y-5">
+        
+        <div class="input-wrapper">
+          <div class="input-icon">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-2.356M17 20H7m10 0v-2c0-1.657-1.343-3-3-3H7c-1.657 0-3 1.343-3 3v2m17 0h-5m-2 0H7m6 0v-6m-3 3H7m6 0v-6m0 3H7"></path>
+            </svg>
+          </div>
+                    <select 
+                      id="loginType" 
+                      class="input-field w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl font-medium outline-none focus:border-purple-500 transition"
+                    >
+                      <option value="peserta">Login sebagai Peserta</option>
+                      <option value="admin">Login sebagai Admin</option>
+                      <option value="lihat_nilai">Lihat Nilai Ujian</option>
+                    </select>
+                  </div>
+                  <div id="formPeserta" class="space-y-5">
+                    <div class="input-wrapper">
+                      <div class="input-icon">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                      </div>
+                      <input 
+                        type="text" 
+                        id="noPeserta" 
+                        placeholder="Nomor Peserta"
+                        class="input-field w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl font-medium outline-none focus:border-purple-500 transition placeholder-gray-400"
+                      >
+                    </div>
+          
+                    <div class="input-wrapper">
+                      <div class="input-icon">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                      </div>
+                      <input 
+                        type="password" 
+                        id="passwordPeserta" 
+                        placeholder="Password"
+                        class="input-field w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl font-medium outline-none focus:border-purple-500 transition placeholder-gray-400"
+                      >
+                    </div>
+                    
+                    <div class="input-wrapper">
+                      <div class="input-icon">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                        </svg>
+                      </div>
+                      <input 
+                        type="text" 
+                        id="pinSesi" 
+                        placeholder="PIN Sesi"
+                        class="input-field w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl font-medium outline-none focus:border-purple-500 transition placeholder-gray-400"
+                      >
+                    </div>
+                  </div>
+                  <div id="formAdmin" class="space-y-5 hidden">
+                    <div class="input-wrapper">
+                      <div class="input-icon">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                      </div>
+                      <input 
+                        type="text" 
+                        id="adminUsername" 
+                        placeholder="Username Admin"
+                        class="input-field w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl font-medium outline-none focus:border-purple-500 transition placeholder-gray-400"
+                      >
+                    </div>
+          
+                    <div class="input-wrapper">
+                      <div class="input-icon">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                      </div>
+                      <input 
+                        type="password" 
+                        id="adminPassword" 
+                        placeholder="Password Admin"
+                        class="input-field w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl font-medium outline-none focus:border-purple-500 transition placeholder-gray-400"
+                      >
+                    </div>
+                  </div>
+                  <div id="formLihatNilai" class="space-y-5 hidden">
+                    <div class="input-wrapper">
+                      <div class="input-icon">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                      </div>
+                      <input 
+                        type="text" 
+                        id="noPesertaNilai" 
+                        placeholder="Nomor Peserta"
+                        class="input-field w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl font-medium outline-none focus:border-purple-500 transition placeholder-gray-400"
+                      >
+                    </div>
+                  </div>
+                  <div id="errorMsg" class="hidden bg-gradient-to-r from-red-500 to-pink-500 text-white px-5 py-3 rounded-xl text-sm font-medium text-center shadow-lg">
+                  </div>
+          
+                  <button 
+                    type="submit" 
+                    id="btnLogin"
+                    class="btn-primary w-full text-white font-bold py-4 rounded-xl transition duration-300 shadow-lg text-lg flex items-center justify-center gap-2"
+                  >
+                    <svg id="loadingSpinner" class="spinner -ml-1 mr-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="btnText">MULAI UJIAN</span>
+                  </button>
+          
+                  <div class="flex items-center justify-center gap-3 pt-3">
+                    <div class="status-indicator px-4 py-2 rounded-full flex items-center gap-2 shadow-md">
+                      <div class="relative">
+                        <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                           <path d="M1.42 16.93l4.24-4.24c3.12-3.12 8.19-3.12 11.31 0l4.24 4.24M5.66 12.69l2.83-2.83c1.95-1.95 5.12-1.95 7.07 0l2.83 2.83M9.9 8.45l1.41-1.41c.78-.78 2.05-.78 2.83 0l1.41 1.41"></path>
+                        </svg>
+                        <span class="absolute -top-1 -right-1 flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                         </span>
+                      </div>
+                      <div class="text-left">
+                        <p class="text-xs text-gray-500 font-medium">Koneksi</p>
+                        <p id="pingTime" class="text-sm font-bold text-gray-700">0.000ms</p>
+                      </div>
+                    </div>
+                   </div>
+                </form>
+              </div>
+              
+              <div class="text-center mt-6 text-white text-sm font-medium drop-shadow-lg">
+                <p>© 2025 Pemerintah Kota Bengkulu</p>
+              </div>
+            </div>
+          
+            <script>
+              // Simulate ping animation
+              function updatePing() {
+                const pingTime = document.getElementById('pingTime');
+                const ping = (Math.random() * 5 + 2).toFixed(3);
+                pingTime.textContent = ping + 'ms';
+              }
+              
+              updatePing();
+              setInterval(updatePing, 2000);
+          
+              // === SCRIPT BARU UNTUK MENGGANTI FORM ===
+              const loginTypeSelect = document.getElementById('loginType');
+              const formPeserta = document.getElementById('formPeserta');
+              const formAdmin = document.getElementById('formAdmin');
+              const formLihatNilai = document.getElementById('formLihatNilai');
+              const btnText = document.getElementById('btnText');
+          
+              loginTypeSelect.addEventListener('change', function() {
+                formPeserta.classList.add('hidden');
+                formAdmin.classList.add('hidden');
+                formLihatNilai.classList.add('hidden');
+          
+                if (this.value === 'peserta') {
+                  formPeserta.classList.remove('hidden');
+                  btnText.textContent = 'MULAI UJIAN';
+                } else if (this.value === 'admin') {
+                  formAdmin.classList.remove('hidden');
+                  btnText.textContent = 'LOGIN ADMIN';
+                } else if (this.value === 'lihat_nilai') {
+                  formLihatNilai.classList.remove('hidden');
+                  btnText.textContent = 'LIHAT NILAI';
+                }
+              });
+              // ==========================================
+          
+              // === MODIFIKASI SUBMIT HANDLER ===
+              document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const loginType = loginTypeSelect.value;
+                const loginData = {
+                  loginType: loginType
+                };
+          
+                // Reset required attributes
+                document.getElementById('noPeserta').required = false;
+                document.getElementById('passwordPeserta').required = false;
+                document.getElementById('pinSesi').required = false;
+                document.getElementById('adminUsername').required = false;
+                document.getElementById('adminPassword').required = false;
+                document.getElementById('noPesertaNilai').required = false;
+          
+                if (loginType === 'peserta') {
+                  loginData.noPeserta = document.getElementById('noPeserta').value.trim();
+                  loginData.password = document.getElementById('passwordPeserta').value.trim();
+                  loginData.pinSesi = document.getElementById('pinSesi').value.trim();
+                  // Set required untuk field peserta
+                  document.getElementById('noPeserta').required = true;
+                  document.getElementById('passwordPeserta').required = true;
+                  document.getElementById('pinSesi').required = true;
+                } else if (loginType === 'admin') {
+                  loginData.username = document.getElementById('adminUsername').value.trim();
+                  loginData.password = document.getElementById('adminPassword').value.trim();
+                  // Set required untuk field admin
+                  document.getElementById('adminUsername').required = true;
+                  document.getElementById('adminPassword').required = true;
+                } else if (loginType === 'lihat_nilai') {
+                  loginData.noPeserta = document.getElementById('noPesertaNilai').value.trim();
+                  document.getElementById('noPesertaNilai').required = true;
+                }
+                
+                const btnLogin = document.getElementById('btnLogin');
+                const errorMsg = document.getElementById('errorMsg');
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                
+                // Disable button dan tampilkan loading
+                btnLogin.disabled = true;
+                loadingSpinner.classList.remove('hidden');
+                btnText.textContent = 'MEMPROSES...';
+                errorMsg.classList.add('hidden');
+                
+                // Panggil fungsi handleLogin baru di backend
+                google.script.run
+                  .withSuccessHandler(function(response) {
+                    if (response.success) {
+                      // Hapus semua data sesi sebelumnya untuk memastikan sesi baru yang bersih
+                      sessionStorage.clear();
+
+                      // Simpan sessionId baru
+                      sessionStorage.setItem('sessionId', response.sessionId);
+          
+                      // Simpan data user berdasarkan role
+                      if (loginType === 'peserta' || loginType === 'lihat_nilai') {
+                        sessionStorage.setItem('peserta', JSON.stringify(response.data));
+                      } else { // admin
+                        sessionStorage.setItem('admin', JSON.stringify(response.data));
+                      }
+                      
+                      // Tampilkan status berhasil
+                      btnText.textContent = 'BERHASIL! Membuka...';
+                      btnLogin.classList.add('bg-green-600');
+          
+                      // Redirect ke halaman yang sesuai (dari respons)
+                      google.script.run.withSuccessHandler(function(url) {
+                        const redirectUrl = url + '?page=' + response.redirectPage + '&sessionId=' + response.sessionId;
+                        const a = document.createElement('a');
+                        a.href = redirectUrl;
+                        a.target = '_top';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.parentNode.removeChild(a);
+                      }).getScriptUrl();
+                      
+                    } else {
+                      errorMsg.textContent = response.message;
+                      errorMsg.classList.remove('hidden');
+                      // Kembalikan tombol ke keadaan semula
+                      btnLogin.disabled = false;
+                      loadingSpinner.classList.add('hidden');
+                      if(loginType === 'peserta') btnText.textContent = 'MULAI UJIAN';
+                      else if(loginType === 'admin') btnText.textContent = 'LOGIN ADMIN';
+                      else if(loginType === 'lihat_nilai') btnText.textContent = 'LIHAT NILAI';
+                    }
+                  })
+                  .withFailureHandler(function(error) {
+                    errorMsg.textContent = 'Terjadi kesalahan: ' + error.message;
+                    errorMsg.classList.remove('hidden');
+          
+                    // Kembalikan tombol ke keadaan semula
+                    btnLogin.disabled = false;
+                    loadingSpinner.classList.add('hidden');
+                    if(loginType === 'peserta') btnText.textContent = 'MULAI UJIAN';
+                    else if(loginType === 'admin') btnText.textContent = 'LOGIN ADMIN';
+                    else if(loginType === 'lihat_nilai') btnText.textContent = 'LIHAT NILAI';
+                  })
+                  .handleLogin(loginData); // Panggil fungsi baru
+              });
+          
+          
+            </script>
+          </body>
+          </html>
+          

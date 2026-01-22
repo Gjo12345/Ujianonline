@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian - Sistem Ujian Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.5);
+        }
+
+        #sidebar {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .question-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .option-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .option-card:hover {
+            transform: translateX(8px);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+        }
+
+        .timer-pulse {
+            animation: pulse-soft 2s infinite;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .number-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-center;
+            min-width: 48px;
+            height: 48px;
+            padding: 0 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .subject-pill {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .subject-pill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .subject-pill:hover::before {
+            left: 100%;
+        }
+
+        .subject-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar"
+            class="glass-sidebar flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-all duration-300 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0"
+            style="width: 320px;">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 flex items-center justify-between h-20">
+                <div class="sidebar-content">
+                    <h3 class="font-bold text-white text-xl flex items-center gap-3">
+                        <div class="bg-white/20 rounded-xl p-2 backdrop-blur-sm">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                        </div>
+                        <span class="sidebar-text">Navigasi Soal</span>
+                    </h3>
+                    <p class="text-white/80 text-sm mt-1.5 ml-14 sidebar-text">Klik untuk berpindah</p>
+                </div>
+                <button id="sidebarCollapseBtn"
+                    class="hidden md:block text-white hover:bg-white/20 p-2.5 rounded-xl transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto sidebar-scrollbar p-6">
+                <div id="petaSoal" class="grid gap-3 transition-all duration-300"
+                    style="grid-template-columns: repeat(4, 1fr);"></div>
+            </div>
+            <div id="sidebarLegend" class="border-t border-gray-200 p-6 bg-gray-50/50 sidebar-content">
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl shadow-sm flex-shrink-0"></div>
+                        <span class="text-gray-700 font-medium sidebar-text">Sudah Dijawab</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-200 rounded-xl shadow-sm flex-shrink-0"></div>
+                        <span class="text-gray-700 font-medium sidebar-text">Belum Dijawab</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-sm ring-2 ring-indigo-200 flex-shrink-0"></div>
+                        <span class="text-gray-700 font-medium sidebar-text">Soal Aktif</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 bg-gray-50/50">
+                <div id="btnLogout" class="flex items-center gap-3 cursor-pointer group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-700 rounded-xl shadow-sm flex-shrink-0 group-hover:opacity-80 transition-opacity"></div>
+                    <span class="text-red-700 font-medium sidebar-text group-hover:text-red-800 transition-colors">Log Out</span>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-h-screen relative">
+            <!-- Header -->
+            <nav class="sticky top-0 z-40 glass-card h-20">
+                <div class="container mx-auto px-6 h-full">
+                    <div class="flex justify-between items-center h-full">
+                        <div class="flex items-center gap-4">
+                            <button id="sidebarToggle" class="md:hidden text-white p-2.5 rounded-xl hover:bg-white/20 transition-all">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 12h16m-7 6h7"></path>
+                                </svg>
+                            </button>
+                            <div class="flex flex-col md:hidden">
+                                <h1 class="text-base font-bold text-white leading-tight" id="namaPesertaMobile">Memuat...</h1>
+                                <p class="text-xs text-white/80" id="noPesertaDisplayMobile">Loading...</p>
+                            </div>
+                            <div class="hidden md:flex items-center gap-4">
+                                <div class="bg-white/20 rounded-2xl p-3 backdrop-blur-sm">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h1 class="text-xl font-bold text-white" id="namaPeserta">Memuat...</h1>
+                                    <p class="text-sm text-white/80 font-medium" id="noPesertaDisplay">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="hidden md:flex items-center gap-3 stat-card rounded-2xl px-5 py-3">
+                                <div class="bg-green-500 rounded-xl p-2">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-white/70 font-medium">Progress</p>
+                                    <p class="text-sm font-bold text-white"><span id="progressCount">0</span>/<span id="totalSoalNav">0</span></p>
+                                </div>
+                            </div>
+                            <div class="stat-card rounded-2xl px-4 py-3 md:px-5 timer-pulse">
+                                <div class="flex items-center gap-3">
+                                    <div class="bg-amber-400 rounded-xl p-2">
+                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-white/70 font-medium">Sisa Waktu</p>
+                                        <p class="text-base md:text-lg font-bold text-white tabular-nums" id="timer">--:--:--</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main id="mainContent" class="flex-1 overflow-y-auto pb-24">
+                <button id="sidebarExpandBtn"
+                    class="hidden fixed top-24 left-4 z-30 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white p-3 rounded-xl shadow-xl transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+                <div class="py-8 px-4 sm:px-6 lg:px-8">
+                    <!-- Subject Buttons -->
+                    <div id="subjectButtonsContainer" class="flex flex-wrap gap-3 justify-center mb-8"></div>
+                    
+                    <!-- Question Card -->
+                    <div class="glass-card rounded-3xl overflow-hidden mb-6 question-card">
+                        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6">
+                            <div class="flex items-center justify-between text-white">
+                                <div class="flex items-center gap-4">
+                                    <div class="number-badge">
+                                        <span>Soal <span id="currentSoalNo">1</span></span>
+                                    </div>
+                                    <span class="text-white/90 font-medium">dari <span id="totalSoal" class="font-bold">0</span></span>
+                                </div>
+                                <div id="statusJawaban" class="px-5 py-2 rounded-full text-sm font-bold bg-white/20 backdrop-blur-sm border border-white/30">
+                                    Belum Dijawab
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-8 md:p-10 bg-white">
+                            <div id="kontenSoal" class="mb-10 text-lg"></div>
+                            <div class="space-y-4" id="pilihanContainer"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="flex gap-4 justify-center flex-wrap">
+                        <button id="btnPrev"
+                            class="glass-card hover:bg-white/20 text-white font-bold py-4 px-8 rounded-2xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                            <span>Sebelumnya</span>
+                        </button>
+                        <button id="btnNext"
+                            class="glass-card hover:bg-white/20 text-white font-bold py-4 px-8 rounded-2xl transition-all transform hover:scale-105 flex items-center justify-center gap-3">
+                            <span>Berikutnya</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                        <button id="btnSubmit"
+                            class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-2xl transition-all transform hover:scale-105 shadow-lg hidden items-center justify-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Selesai Ujian</span>
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="w-full glass-card p-5">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-3 max-w-7xl mx-auto px-2">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 rounded-xl p-2 backdrop-blur-sm">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                </path>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-semibold text-white">
+                            <span class="hidden md:inline">Sistem Ujian Online</span>
+                            <span class="md:hidden">Ujian Online</span>
+                        </p>
+                    </div>
+                    <p class="text-sm text-white/80 font-medium">
+                        &copy; <span id="currentYear"></span> 
+                        <span class="hidden md:inline">Dibuat oleh Tim Pengembang</span>
+                        <span class="md:hidden">Tim Pengembang</span>
+                    </p>
+                    <div class="flex items-center gap-2 text-xs text-white/80 font-medium">
+                        <div class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
+                        <span>Terhubung</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Submit Modal -->
+    <div id="modalSubmit"
+        class="hidden fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-6">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <div class="bg-white/20 rounded-xl p-2 backdrop-blur-sm">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    Konfirmasi Submit Ujian
+                </h3>
+            </div>
+            <div class="p-8">
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-500 rounded-xl p-5 mb-6">
+                    <p class="text-gray-700 font-medium">Anda telah menjawab <span id="terjawab"
+                            class="font-bold text-green-600 text-2xl"></span> dari <span id="totalSoalModal"
+                            class="font-bold text-indigo-600 text-2xl"></span> soal.</p>
+                </div>
+                <p class="text-gray-600 mb-8 leading-relaxed">Apakah Anda yakin ingin menyelesaikan ujian? Jawaban Anda akan disimpan
+                    dan tidak dapat diubah lagi.</p>
+                <div class="flex gap-4">
+                    <button id="btnBatal"
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-xl transition-all">Batal</button>
+                    <button id="btnKonfirmasi"
+                        class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg">Ya, Selesai</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Peringatan Beralih Tab -->
+    <div id="modalTabSwitch"
+        class="hidden fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[70] p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-600 px-8 py-6">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <div class="bg-white/20 rounded-xl p-2 backdrop-blur-sm">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    Peringatan Beralih Tab
+                </h3>
+            </div>
+            <div class="p-8">
+                <p class="text-gray-700 font-medium text-lg mb-4">Anda telah beralih dari halaman ujian.</p>
+                <p class="text-gray-600 mb-6 leading-relaxed">Ini adalah <span class="font-bold text-red-600">peringatan pertama dan terakhir</span>. Jika Anda beralih tab sekali lagi, sesi ujian akan otomatis berakhir dan semua jawaban Anda akan dikumpulkan.</p>
+                <p class="text-sm text-gray-500 mb-8">Harap tetap fokus pada halaman ujian untuk menghindari penghentian sesi.</p>
+                <div class="flex gap-4">
+                    <button id="btnMengerti"
+                        class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg">Saya Mengerti</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let soalData = [],
+        currentIndex = 0,
+        jawabanPeserta = {},
+        peserta = null,
+        sisaDetik = 0,
+        timerInterval, stateSaveInterval,
+        totalQuestionsInExam = 0;
+    let ujianTelahDisubmit = false;
+    let sidebarCollapsed = false;
+    let currentSubject = '';
+    let allSubjects = [];
+    let tabSwitchCount = 0; // <-- Variabel baru untuk melacak perpindahan tab
+
+    // ==================== KONFIGURASI UKURAN DEFAULT ====================
+    
+    const DEFAULT_IMAGE_SIZE = {
+        pertanyaan: {
+            maxWidth: '800px',
+            maxHeight: '600px'
+        },
+        opsi: {
+            maxWidth: '300px',
+            maxHeight: '200px'
+        }
+    };
+
+    // ==================== FUNGSI PARSE URL DAN UKURAN ====================
+
+    /**
+     * Memisahkan URL dan parameter ukuran dari string
+     * Format: URL|WIDTHxHEIGHT atau URL|WIDTH
+     * Contoh: https://example.com/image.jpg|500x300
+     */
+    function parseUrlWithSize(urlString) {
+        if (typeof urlString !== 'string') return { url: urlString, size: null };
+        
+        const parts = urlString.split('|');
+        const url = parts[0].trim();
+        let size = null;
+        
+        if (parts.length > 1) {
+            const sizeStr = parts[1].trim();
+            
+            // Format: WIDTHxHEIGHT (contoh: 500x300)
+            if (sizeStr.includes('x')) {
+                const [width, height] = sizeStr.split('x');
+                size = {
+                    width: width.trim() + 'px',
+                    height: height.trim() + 'px'
+                };
+            } 
+            // Format: WIDTH saja (contoh: 500)
+            else {
+                size = {
+                    width: sizeStr.trim() + 'px',
+                    height: 'auto'
+                };
+            }
+        }
+        
+        return { url: url, size: size };
+    }
+
+    /**
+     * Membuat style CSS untuk gambar berdasarkan ukuran
+     */
+    function getImageStyleFromSize(size, defaultType) {
+        let styleString = '';
+        
+        if (size) {
+            // Jika ada custom size dari parameter
+            if (size.width) styleString += 'max-width: ' + size.width + '; ';
+            if (size.height && size.height !== 'auto') {
+                styleString += 'max-height: ' + size.height + '; ';
+            }
+        } else {
+            // Gunakan ukuran default
+            const defaultSize = DEFAULT_IMAGE_SIZE[defaultType];
+            styleString += 'max-width: ' + defaultSize.maxWidth + '; ';
+            styleString += 'max-height: ' + defaultSize.maxHeight + '; ';
+        }
+        
+        styleString += 'width: auto; height: auto; ';
+        
+        return styleString;
+    }
+
+    // ==================== FUNGSI HELPER UNTUK GOOGLE DRIVE ====================
+
+    function extractGoogleDriveFileId(url) {
+        if (typeof url !== 'string' || url.trim() === '') return null;
+        
+        let match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) return match[1];
+        
+        match = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+        if (match) return match[1];
+        
+        match = url.match(/drive\.google\.com\/uc\?.*id=([a-zA-Z0-9_-]+)/);
+        if (match) return match[1];
+        
+        match = url.match(/docs\.google\.com\/(?:document|spreadsheets|presentation|forms|drawings)\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) return match[1];
+        
+        match = url.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) return match[1];
+        
+        return null;
+    }
+
+    function convertToGoogleDriveImageUrl(url) {
+        const fileId = extractGoogleDriveFileId(url);
+        if (fileId) {
+            return 'https://lh3.googleusercontent.com/d/' + fileId;
+        }
+        return url;
+    }
+
+    function isImageUrl(url) {
+        if (typeof url !== 'string' || url.trim() === '') return false;
+        
+        if (extractGoogleDriveFileId(url)) {
+            return true;
+        }
+        
+        return /^https?:\/\/.+\.(jpg|jpeg|png|gif|bmp|svg|webp)(\?.*)?$/i.test(url);
+    }
+
+    function getDisplayableImageUrl(url) {
+        if (!isImageUrl(url)) return null;
+        
+        const fileId = extractGoogleDriveFileId(url);
+        if (fileId) {
+            return convertToGoogleDriveImageUrl(url);
+        }
+        
+        return url;
+    }
+
+    // ==================== FUNGSI SIDEBAR ====================
+
+    const sidebarToggle = document.getElementById('sidebarToggle'),
+        sidebar = document.getElementById('sidebar'),
+        sidebarOverlay = document.getElementById('sidebarOverlay'),
+        sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn'),
+        sidebarExpandBtn = document.getElementById('sidebarExpandBtn');
+
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+    }
+
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        sidebarOverlay.classList.remove('hidden');
+    }
+
+    function toggleSidebarCollapse() {
+        sidebarCollapsed = !sidebarCollapsed;
+        if (sidebarCollapsed) {
+            sidebar.style.width = '80px';
+            sidebarExpandBtn.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-text').forEach(el => el.style.display = 'none');
+            document.getElementById('sidebarLegend').style.display = 'none';
+            document.getElementById('petaSoal').style.gridTemplateColumns = '1fr';
+            sidebarCollapseBtn.innerHTML =
+                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>';
+        } else {
+            sidebar.style.width = '320px';
+            sidebarExpandBtn.classList.add('hidden');
+            document.querySelectorAll('.sidebar-text').forEach(el => el.style.display = '');
+            document.getElementById('sidebarLegend').style.display = '';
+            document.getElementById('petaSoal').style.gridTemplateColumns = 'repeat(4, 1fr)';
+            sidebarCollapseBtn.innerHTML =
+                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>';
+        }
+    }
+
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarCollapseBtn.addEventListener('click', toggleSidebarCollapse);
+    sidebarExpandBtn.addEventListener('click', toggleSidebarCollapse);
+
+    // ==================== FUNGSI STATE & TIMER ====================
+
+    function saveState() {
+        if (soalData.length > 0) sessionStorage.setItem('examState', JSON.stringify({
+            jawabanPeserta,
+            sisaDetik,
+            currentIndex,
+            currentSubject
+        }));
+    }
+
+    function startTimer(waktuAwalDetik) {
+        sisaDetik = waktuAwalDetik;
+        if (timerInterval) clearInterval(timerInterval);
+        if (stateSaveInterval) clearInterval(stateSaveInterval);
+        timerInterval = setInterval(() => {
+            sisaDetik--;
+            const jam = Math.floor(sisaDetik / 3600),
+                menit = Math.floor((sisaDetik % 3600) / 60),
+                detik = sisaDetik % 60;
+            document.getElementById('timer').textContent =
+                String(jam).padStart(2, '0') + ':' + String(menit).padStart(2, '0') + ':' + String(detik).padStart(2, '0');
+            if (sisaDetik <= 0 && !ujianTelahDisubmit) {
+                submitUjian('Waktu Habis!');
+            }
+        }, 1000);
+        stateSaveInterval = setInterval(saveState, 5000);
+    }
+
+    function restoreStateAndStart() {
+        const savedState = JSON.parse(sessionStorage.getItem('examState'));
+        if (savedState) {
+            jawabanPeserta = savedState.jawabanPeserta || {};
+            currentIndex = savedState.currentIndex || 0;
+            currentSubject = savedState.currentSubject || '';
+            if (savedState.sisaDetik > 0) {
+                startTimer(savedState.sisaDetik);
+            } else {
+                google.script.run.withSuccessHandler(waktu => {
+                    sessionStorage.setItem('totalWaktuUjian', waktu * 60); // Simpan total waktu dalam detik
+                    startTimer(waktu * 60);
+                }).getWaktuUjian();
+            }
+        } else {
+            google.script.run.withSuccessHandler(waktu => {
+                sessionStorage.setItem('totalWaktuUjian', waktu * 60); // Simpan total waktu dalam detik
+                startTimer(waktu * 60);
+            }).getWaktuUjian();
+        }
+        loadSubjects();
+    }
+
+    // ==================== FUNGSI VALIDASI SESSION ====================
+
+    function validateSession() {
+        const terminationReason = sessionStorage.getItem('examTerminationReason');
+        if (terminationReason) {
+            let message = '';
+            if (terminationReason === 'tab_switch') {
+                message = 'Sesi ujian Anda telah dihentikan secara permanen karena beralih tab.';
+            } else if (terminationReason === 'completed') {
+                message = 'Sesi ujian Anda telah dihentikan secara permanen karena telah menyelesaikan ujian.';
+            } else {
+                message = 'Sesi ujian Anda telah dihentikan secara permanen.'; // Fallback
+            }
+
+            document.body.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+                    <div class="text-center p-8">
+                        <h1 class="text-5xl font-bold text-red-500 mb-4">Akses Ditolak</h1>
+                        <p class="text-xl text-gray-300 mb-6">${message}</p>
+                        <button 
+                            onclick="window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>?page=Index'" 
+                            class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg transform hover:scale-105">
+                            Kembali ke Halaman Login
+                        </button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const sessionId = sessionStorage.getItem('sessionId');
+        if (!sessionId) {
+            google.script.run.withSuccessHandler(url => {
+            const redirectUrl = url + '?page=Index&error=Sesi+habis';
+            const a = document.createElement('a');
+            a.href = redirectUrl;
+            a.target = '_top';
+            document.body.appendChild(a);
+            a.click();
+            a.parentNode.removeChild(a);
+        }).getScriptUrl();
+            return;
+        }
+        google.script.run.withSuccessHandler(response => {
+            if (response.success) {
+                peserta = response.data;
+                document.getElementById('namaPeserta').textContent = peserta.nama;
+                document.getElementById('noPesertaDisplay').textContent = 'No. Peserta: ' + peserta.noPeserta;
+                document.getElementById('namaPesertaMobile').textContent = peserta.nama;
+                document.getElementById('noPesertaDisplayMobile').textContent = 'No. Peserta: ' + peserta.noPeserta;
+                restoreStateAndStart();
+
+                // Pre-fetch the total question count to avoid delay in the submit modal
+                google.script.run.withSuccessHandler(function(countResponse) {
+                    if (countResponse.success) {
+                        totalQuestionsInExam = countResponse.total;
+                    }
+                }).getTotalQuestionCount();
+
+            } else {
+                document.body.innerHTML = `
+                    <div class="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+                        <div class="text-center p-8">
+                            <h1 class="text-5xl font-bold text-red-500 mb-4">Akses Ditolak</h1>
+                            <p class="text-xl text-gray-300 mb-6">${response.message || 'Sesi Anda telah berakhir atau tidak valid.'}</p>
+                            <button 
+                                onclick="window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>?page=Index'" 
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg transform hover:scale-105">
+                                Kembali ke Halaman Login
+                            </button>
+                        </div>
+                    </div>
+                `;
+                // Also clear the session storage to prevent repeated attempts
+                sessionStorage.clear();
+            }
+        }).getUserSession(sessionId);
+    }
+
+    // ==================== FUNGSI LOAD SUBJECTS ====================
+
+    function loadSubjects() {
+        google.script.run.withSuccessHandler(response => {
+            if (!response.success) {
+                alert(response.message);
+                return;
+            }
+            
+            allSubjects = response.subjects;
+            const container = document.getElementById('subjectButtonsContainer');
+            container.innerHTML = '';
+            
+            response.subjects.forEach(subject => {
+                const button = document.createElement('button');
+                button.textContent = subject.replace('soal_', '').replace(/_/g, ' ').toUpperCase();
+                button.className = 'subject-pill glass-card text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all transform hover:scale-105';
+                button.onclick = () => loadSoal(subject);
+                container.appendChild(button);
+            });
+
+            if (response.hasEssay) {
+                const essayButton = document.createElement('button');
+                essayButton.textContent = 'SOAL ESAI';
+                essayButton.className = 'subject-pill glass-card text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all transform hover:scale-105';
+                essayButton.onclick = () => loadSoal('soal_esai');
+                container.appendChild(essayButton);
+                allSubjects.push('soal_esai');
+            }
+
+            if (currentSubject && allSubjects.includes(currentSubject)) {
+                loadSoal(currentSubject); // Restore state
+            } else if (allSubjects.length > 0) {
+                loadSoal(allSubjects[0], 'Kami akan menampilkan soal, mohon tunggu sebentar.'); // Initial load
+            }
+        }).getExamSubjects();
+    }
+
+    // ==================== FUNGSI LOAD SOAL ====================
+
+    function loadSoal(sheetName, customMessage = null, suppressLoading = false) {
+
+        currentSubject = sheetName;
+
+        document.querySelectorAll('#subjectButtonsContainer button').forEach(btn => {
+
+            const btnText = btn.textContent.toLowerCase();
+
+            const isCurrentButtonEssay = btnText === 'soal esai';
+
+            
+
+            const isSheetEssay = sheetName === 'soal_esai';
+
+            const isSheetSubject = btnText === sheetName.replace('soal_', '').replace(/_/g, ' ');
+
+    
+
+            const isActive = (isSheetEssay && isCurrentButtonEssay) || (!isSheetEssay && isSheetSubject);
+
+    
+
+            if (isActive) {
+
+                btn.classList.add('ring-4', 'ring-white');
+
+                btn.classList.remove('opacity-70');
+
+            } else {
+
+                btn.classList.remove('ring-4', 'ring-white');
+
+                btn.classList.add('opacity-70');
+
+            }
+
+        });
+
+    
+
+        if (!suppressLoading) {
+
+            const loadingText = customMessage || 'Kami akan menampilkan soal berikutnya, mohon tunggu sebentar.';
+
+            Swal.fire({
+
+                title: 'Memuat Soal...',
+
+                text: loadingText,
+
+                icon: 'info',
+
+                allowOutsideClick: false,
+
+                allowEscapeKey: false,
+
+                didOpen: () => {
+
+                    Swal.showLoading();
+
+                }
+
+            });
+
+        }
+
+    
+
+        google.script.run
+
+            .withSuccessHandler(data => {
+
+                Swal.close(); // This will close the modal shown by either this function or the calling function
+
+                if (data.error) {
+
+                    Swal.fire('Error', data.message, 'error');
+
+                    return;
+
+                }
+
+                soalData = data;
+
+                document.getElementById('totalSoal').textContent = soalData.length;
+
+                renderPetaSoal();
+
+                tampilkanSoal(0);
+
+                updateProgressCount();
+
+            })
+
+            .withFailureHandler(error => {
+
+                Swal.close(); // This will close the modal shown by either this function or the calling function
+
+                Swal.fire('Error', 'Gagal memuat soal: ' + error.message, 'error');
+
+            })
+
+            .loadSoal(sheetName);
+
+    }
+
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    // ==================== FUNGSI TAMPILKAN SOAL (DENGAN UKURAN CUSTOM) ====================
+
+    function tampilkanSoal(index) {
+        if (index < 0 || index >= soalData.length || !soalData[index]) return;
+        if (window.innerWidth < 768) closeSidebar();
+        currentIndex = index;
+        const soal = soalData[index];
+        const kontenSoal = document.getElementById('kontenSoal');
+        const pilihanContainer = document.getElementById('pilihanContainer');
+        kontenSoal.innerHTML = '';
+        pilihanContainer.innerHTML = '';
+
+        // PARSE URL DAN UKURAN DARI PERTANYAAN
+        const parsedPertanyaan = parseUrlWithSize(soal.pertanyaan);
+        
+        // TAMPILKAN PERTANYAAN
+        if (isImageUrl(parsedPertanyaan.url)) {
+            const imgUrl = getDisplayableImageUrl(parsedPertanyaan.url);
+            const imgStyle = getImageStyleFromSize(parsedPertanyaan.size, 'pertanyaan');
+            
+            kontenSoal.innerHTML = '<img src="' + imgUrl + '" alt="Gambar Pertanyaan" ' +
+                'style="' + imgStyle + '" ' +
+                'class="mx-auto rounded-2xl shadow-lg border-2 border-gray-100 object-contain" ' +
+                'onerror="this.onerror=null; this.alt=\'Gambar tidak dapat dimuat\'; this.className=\'text-red-500 text-center p-8 bg-red-50 rounded-2xl border-2 border-red-200\';">';
+        } else {
+            kontenSoal.innerHTML = '<div class="flex items-start gap-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border-l-4 border-indigo-500">' +
+                '<div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-3 mt-1 shrink-0 shadow-sm">' +
+                '<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>' +
+                '</svg>' +
+                '</div>' +
+                '<p class="text-lg text-gray-800 leading-relaxed flex-1 font-medium">' + parsedPertanyaan.url + '</p>' +
+                '</div>';
+        }
+
+        const jawabanTersimpan = (jawabanPeserta[currentSubject] && jawabanPeserta[currentSubject][soal.no]) || '';
+
+        if (soal.tipe === 'Esai') {
+            pilihanContainer.innerHTML = 
+                '<div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200">' +
+                '<label for="essayAnswer" class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">' +
+                '<svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>' +
+                '</svg>' +
+                'Tuliskan jawaban Anda di bawah ini:' +
+                '</label>' +
+                '<textarea id="essayAnswer" rows="10" class="w-full p-5 border-2 border-purple-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition shadow-sm font-medium text-gray-700" placeholder="Ketik jawaban Anda di sini..."></textarea>' +
+                '</div>';
+            
+            const textarea = document.getElementById('essayAnswer');
+            textarea.value = jawabanTersimpan;
+            textarea.addEventListener('blur', (e) => {
+                simpanJawaban(e.target.value);
+            });
+
+        } else {
+            const options = [
+                { key: 'A', text: soal.opsiA },
+                { key: 'B', text: soal.opsiB },
+                { key: 'C', text: soal.opsiC },
+                { key: 'D', text: soal.opsiD },
+            ].filter(o => o.text);
+
+            const shuffledOptions = shuffleArray(options);
+
+            shuffledOptions.forEach((opsi, i) => {
+                const displayLetter = String.fromCharCode(65 + i);
+                
+                // PARSE URL DAN UKURAN DARI OPSI
+                const parsedOpsi = parseUrlWithSize(opsi.text);
+                
+                let displayKonten = '';
+                if (isImageUrl(parsedOpsi.url)) {
+                    const imgUrl = getDisplayableImageUrl(parsedOpsi.url);
+                    const imgStyle = getImageStyleFromSize(parsedOpsi.size, 'opsi');
+                    
+                    displayKonten = '<img src="' + imgUrl + '" alt="Opsi ' + displayLetter + '" ' +
+                        'style="' + imgStyle + '" ' +
+                        'class="rounded-xl border-2 border-white shadow-md ml-3 object-contain" ' +
+                        'onerror="this.onerror=null; this.alt=\'Gambar tidak dapat dimuat\'; this.className=\'text-red-500 text-sm ml-3\';">';
+                } else {
+                    displayKonten = '<span class="flex-1 text-gray-800 font-medium">' + parsedOpsi.url + '</span>';
+                }
+                
+                const div = document.createElement('div');
+                const isChecked = (jawabanTersimpan === opsi.text);
+                
+                div.className = 'option-card group border-2 rounded-xl p-3 transition-all ' +
+                              (isChecked ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg' : 'border-gray-200 hover:border-indigo-300 bg-white hover:shadow-md');
+                
+                const checkedAttr = isChecked ? 'checked' : '';
+                const spanClass = isChecked ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' : 'bg-gray-100 text-gray-700 group-hover:bg-indigo-100';
+                
+                div.innerHTML = '<label class="flex items-start cursor-pointer">' +
+                    '<input type="radio" name="jawaban" value="' + opsi.text + '" ' + checkedAttr + ' class="mt-0.5 mr-3 w-5 h-5 text-indigo-600 focus:ring-2 focus:ring-indigo-500 shrink-0">' +
+                    '<div class="flex items-center gap-3 flex-1">' +
+                    '<span class="inline-flex items-center justify-center w-8 h-8 rounded-xl font-bold text-lg shrink-0 shadow-sm transition-all ' + spanClass + '">' + displayLetter + '</span>' +
+                    displayKonten +
+                    '</div>' +
+                    '</label>';
+                
+                div.addEventListener('click', e => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const radio = div.querySelector('input');
+                        radio.checked = true;
+                        simpanJawaban(radio.value);
+                    }
+                });
+                div.querySelector('input').addEventListener('change', (e) => simpanJawaban(e.target.value));
+                pilihanContainer.appendChild(div);
+            });
+        }
+
+        document.getElementById('currentSoalNo').textContent = index + 1;
+        updateStatusJawaban();
+        updateNavigasi();
+        updatePetaSoal();
+    }
+
+    // ==================== FUNGSI SIMPAN JAWABAN ====================
+
+    function simpanJawaban(jawaban) {
+        const soal = soalData[currentIndex];
+        if (!jawabanPeserta[currentSubject]) {
+            jawabanPeserta[currentSubject] = {};
+        }
+        jawabanPeserta[currentSubject][soal.no] = jawaban;
+        
+        updateStatusJawaban();
+        updatePetaSoal();
+        updateProgressCount();
+
+        if (soal.tipe === 'Pilihan Ganda') {
+            document.querySelectorAll('#pilihanContainer > div').forEach(div => {
+                const input = div.querySelector('input');
+                const isChecked = input && input.value === jawaban;
+                div.className = 'option-card group border-2 rounded-xl p-3 transition-all ' +
+                    (isChecked ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg' : 'border-gray-200 hover:border-indigo-300 bg-white hover:shadow-md');
+                if(input) {
+                    const span = div.querySelector('span.inline-flex');
+                    if(span) {
+                        span.className = 'inline-flex items-center justify-center w-8 h-8 rounded-xl font-bold text-lg shrink-0 shadow-sm transition-all ' + 
+                            (isChecked ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' : 'bg-gray-100 text-gray-700 group-hover:bg-indigo-100');
+                    }
+                }
+            });
+        }
+        saveState();
+    }
+
+    // ==================== FUNGSI SUBMIT UJIAN ====================
+
+    function submitUjian(alasan = "Ujian Selesai") {
+        if (ujianTelahDisubmit) return;
+        ujianTelahDisubmit = true;
+        clearInterval(timerInterval);
+        clearInterval(stateSaveInterval);
+
+        document.getElementById('modalSubmit').classList.add('hidden');
+
+        Swal.fire({
+            title: 'Menyelesaikan Ujian...',
+            text: 'Menyimpan jawaban dan memfinalisasi semua mata pelajaran. Mohon tunggu.',
+            icon: 'info',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Use the same robust finalization logic as logout and tab-switch
+        google.script.run
+            .withSuccessHandler(response => {
+                if (response.success) {
+                    sessionStorage.setItem('examTerminationReason', 'completed'); // Flag that exam is done
+                    sessionStorage.setItem('peserta', JSON.stringify(peserta)); // Save participant data for results page
+                    
+                    Swal.fire({
+                        title: 'Ujian Selesai!',
+                        text: 'Terima kasih telah melaksanakan tes ujian online. Anda akan diarahkan ke halaman login.',
+                        icon: 'success',
+                        confirmButtonText: 'Oke',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    }).then(() => {
+                        google.script.run.withSuccessHandler(url => {
+                            const redirectUrl = url + '?page=Index';
+                            const a = document.createElement('a');
+                            a.href = redirectUrl;
+                            a.target = '_top';
+                            document.body.appendChild(a);
+                            a.click();
+                            a.parentNode.removeChild(a);
+                        }).getScriptUrl();
+                    });
+                } else {
+                    ujianTelahDisubmit = false;
+                    Swal.fire('Gagal Finalisasi', response.message, 'error');
+                }
+            })
+            .withFailureHandler(err => {
+                ujianTelahDisubmit = false;
+                Swal.fire('Error Finalisasi', err.message, 'error');
+            })
+            .submitAllAnswersAndFinalize(peserta.noPeserta, jawabanPeserta, sessionStorage.getItem('totalWaktuUjian'), sisaDetik, 'selesai');
+    }
+
+    // ==================== FUNGSI UPDATE UI ====================
+
+    function updateStatusJawaban() {
+        if (!soalData || soalData.length === 0 || !soalData[currentIndex]) return;
+        const s = document.getElementById('statusJawaban');
+        if (jawabanPeserta[currentSubject] && jawabanPeserta[currentSubject][soalData[currentIndex].no]) {
+            s.textContent = '✓ Sudah Dijawab';
+            s.className = 'px-5 py-2 rounded-full text-sm font-bold bg-green-500 text-white shadow-sm';
+        } else {
+            s.textContent = 'Belum Dijawab';
+            s.className = 'px-5 py-2 rounded-full text-sm font-bold bg-white/20 backdrop-blur-sm border border-white/30 text-white';
+        }
+    }
+
+    function updateNavigasi() {
+        if (!soalData || soalData.length === 0) return;
+        document.getElementById('btnPrev').disabled = currentIndex === 0;
+
+        const isLastQuestionInCurrentSubject = currentIndex === soalData.length - 1;
+        const isLastSubjectInExam = allSubjects.length > 0 && currentSubject === allSubjects[allSubjects.length - 1];
+
+        const showSubmitButton = isLastQuestionInCurrentSubject && isLastSubjectInExam;
+
+        document.getElementById('btnSubmit').classList.toggle('hidden', !showSubmitButton);
+        document.getElementById('btnNext').classList.toggle('hidden', showSubmitButton);
+    }
+
+    function renderPetaSoal() {
+        const p = document.getElementById('petaSoal');
+        p.innerHTML = '';
+        soalData.forEach((s, i) => {
+            const btn = document.createElement('button');
+            btn.textContent = i + 1;
+            btn.className = 'w-11 h-11 rounded-xl font-bold transition-all transform hover:scale-110 shadow-sm';
+            btn.onclick = () => tampilkanSoal(i);
+            p.appendChild(btn);
+        });
+        updatePetaSoal();
+    }
+
+    function updatePetaSoal() {
+        document.querySelectorAll('#petaSoal button').forEach((btn, i) => {
+            if (!soalData[i]) return;
+            const dijawab = jawabanPeserta[currentSubject] && jawabanPeserta[currentSubject][soalData[i].no];
+            let base = 'w-11 h-11 rounded-xl font-bold transition-all transform hover:scale-110 shadow-sm ';
+            btn.className = base + (dijawab ?
+                'bg-gradient-to-br from-green-400 to-emerald-500 text-white' :
+                'bg-gray-200 text-gray-700 hover:bg-gray-300');
+            if (i === currentIndex) btn.className += ' ring-4 ring-indigo-400 scale-110';
+        });
+    }
+
+    function updateProgressCount() {
+        let totalAnswered = 0;
+        for (const subject in jawabanPeserta) {
+            if (Object.hasOwnProperty.call(jawabanPeserta, subject)) {
+                totalAnswered += Object.keys(jawabanPeserta[subject]).length;
+            }
+        }
+        document.getElementById('progressCount').textContent = totalAnswered;
+        document.getElementById('totalSoalNav').textContent = totalQuestionsInExam > 0 ? totalQuestionsInExam : '0'; // Use global total
+    }
+
+    function submitAndLoadNextSubject() {
+        // Immediately show the loading modal
+        Swal.fire({
+            title: 'Memuat Soal...',
+            text: 'Kami akan menampilkan soal berikutnya, mohon tunggu sebentar.',
+            icon: 'info',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    
+        google.script.run
+            .withSuccessHandler(res => {
+                if (res.success) {
+                    const currentSubjectIndex = allSubjects.indexOf(currentSubject);
+                    const nextSubjectIndex = currentSubjectIndex + 1;
+                    if (nextSubjectIndex < allSubjects.length) {
+                        const nextSubjectName = allSubjects[nextSubjectIndex];
+                        // Call loadSoal but suppress its own loading message
+                        loadSoal(nextSubjectName, null, true); 
+                    } else {
+                        Swal.close(); // Close the modal if there are no more subjects
+                        document.getElementById('btnNext').classList.add('hidden');
+                    }
+                } else {
+                    // On failure, close the modal and show the error
+                    Swal.fire('Gagal Menyimpan', res.message, 'error');
+                }
+            })
+            .withFailureHandler(err => {
+                // On failure, close the modal and show the error
+                Swal.fire('Error', err.message, 'error');
+            })
+            .submitJawaban(peserta.noPeserta, jawabanPeserta[currentSubject], "Selesai", currentSubject);
+    }
+    // ==================== EVENT LISTENERS ====================
+
+    document.getElementById('btnPrev').addEventListener('click', () => tampilkanSoal(currentIndex - 1));
+    document.getElementById('btnNext').addEventListener('click', () => {
+        const isLastQuestionInCurrentSubject = currentIndex === soalData.length - 1;
+        
+        if (isLastQuestionInCurrentSubject) {
+            submitAndLoadNextSubject();
+        } else {
+            tampilkanSoal(currentIndex + 1);
+        }
+    });
+    document.getElementById('btnSubmit').addEventListener('click', () => {
+        let totalAnswered = 0;
+        for (const subject in jawabanPeserta) {
+            if (Object.hasOwnProperty.call(jawabanPeserta, subject)) {
+                totalAnswered += Object.keys(jawabanPeserta[subject]).length;
+            }
+        }
+        document.getElementById('terjawab').textContent = totalAnswered;
+        
+        // Use the pre-fetched total question count
+        document.getElementById('totalSoalModal').textContent = totalQuestionsInExam > 0 ? totalQuestionsInExam : '?';
+        
+        document.getElementById('modalSubmit').classList.remove('hidden');
+    });
+    document.getElementById('btnBatal').addEventListener('click', () => document.getElementById('modalSubmit').classList.add('hidden'));
+    document.getElementById('btnKonfirmasi').addEventListener('click', () => submitUjian());
+    document.getElementById('btnLogout').addEventListener('click', logout);
+    
+    // <-- Listener untuk tombol "Saya Mengerti" pada modal peringatan
+    document.getElementById('btnMengerti').addEventListener('click', () => {
+        document.getElementById('modalTabSwitch').classList.add('hidden');
+    });
+
+
+    // ==================== TAB SWITCH HANDLER (MODIFIED) ====================
+
+    function handleTabSwitch() {
+        if (ujianTelahDisubmit) return;
+
+        if (tabSwitchCount === 0) {
+            // Peringatan pertama
+            document.getElementById('modalTabSwitch').classList.remove('hidden');
+            tabSwitchCount++;
+        } else {
+            // Peringatan kedua, langsung submit
+            ujianTelahDisubmit = true;
+            sessionStorage.setItem('examTerminationReason', 'tab_switch');
+            Swal.fire({
+                title: 'Memproses Penghentian Ujian...',
+                text: 'Anda telah beralih tab untuk kedua kalinya. Sesi ujian sedang dihentikan.',
+                icon: 'warning',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            // Panggil fungsi submit yang sesungguhnya
+             google.script.run
+                .withSuccessHandler(response => {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Sesi Ujian Berakhir',
+                            text: 'Karena Anda beralih tab, sesi ujian telah dihentikan. Anda akan diarahkan ke halaman login.',
+                            icon: 'warning',
+                            confirmButtonText: 'Oke',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                sessionStorage.setItem('peserta', JSON.stringify(peserta)); // Simpan data peserta untuk halaman hasil
+                                google.script.run.withSuccessHandler(url => {
+                                    const redirectUrl = url + '?page=Index';
+                                    const a = document.createElement('a');
+                                    a.href = redirectUrl;
+                                    a.target = '_top';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    a.parentNode.removeChild(a);
+                                }).getScriptUrl();
+                            }
+                        });
+                    } else {
+                        Swal.fire('Gagal', response.message, 'error');
+                        ujianTelahDisubmit = false; // Reset jika gagal
+                    }
+                })
+                .withFailureHandler(err => {
+                    Swal.fire('Error', err.message, 'error');
+                    ujianTelahDisubmit = false; // Reset jika gagal
+                })
+                .submitAllAnswersAndFinalize(peserta.noPeserta, jawabanPeserta, sessionStorage.getItem('totalWaktuUjian'), sisaDetik, 'tidak selesai');
+        }
+    }
+
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            handleTabSwitch();
+        }
+    });
+
+    // ==================== FUNGSI LOGOUT ====================
+    function logout() {
+        Swal.fire({
+            title: 'Konfirmasi Logout',
+            text: 'Anda yakin ingin keluar? Semua mata pelajaran yang telah dikerjakan akan difinalisasi.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Keluar & Finalisasi',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ujianTelahDisubmit = true;
+                Swal.fire({
+                    title: 'Memfinalisasi Ujian...',
+                    text: 'Menyimpan semua jawaban Anda. Mohon tunggu.',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                google.script.run
+                                    .withSuccessHandler(response => {
+                                        if (response.success) {
+                                            sessionStorage.clear();
+                                            // Close the "Finalizing..." spinner
+                                            Swal.close();
+                                            
+                                            google.script.run.withSuccessHandler(url => {
+                                                const redirectUrl = url + '?page=Index';
+                                                document.body.innerHTML = `
+                                                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f0f2f5; font-family: sans-serif; text-align: center; padding: 20px;">
+                                                        <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 500px; width: 100%;">
+                                                            <h1 style="color: #28a745; font-size: 2.2em; margin-bottom: 16px;">Ujian Selesai</h1>
+                                                            <p style="font-size: 1.1em; color: #333; margin-bottom: 24px; line-height: 1.5;">Semua jawaban Anda telah berhasil disimpan.</p>
+                                                            <a href="${redirectUrl}" target="_top" style="display: inline-block; padding: 12px 24px; font-size: 1.1em; color: white; background-color: #007bff; border-radius: 6px; text-decoration: none; transition: background-color 0.2s ease;">
+                                                                Kembali ke Halaman Login
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).getScriptUrl();
+                                        } else {
+                                            Swal.fire('Gagal Finalisasi', response.message, 'error');
+                                            ujianTelahDisubmit = false;
+                                        }
+                                    })                    .withFailureHandler(err => {
+                        Swal.fire('Error', err.message, 'error');
+                        ujianTelahDisubmit = false;
+                    })
+                    .submitAllAnswersAndFinalize(peserta.noPeserta, jawabanPeserta, sessionStorage.getItem('totalWaktuUjian'), sisaDetik, 'selesai (log out)');
+            }
+        });
+    }
+
+    // ==================== INITIALIZATION ====================
+
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    validateSession();
+    history.pushState(null, null, location.href);
+    window.onpopstate = () => history.go(1);
+</script>
+</body>
+</html>

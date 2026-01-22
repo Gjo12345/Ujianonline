@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Nilai Ujian - Sistem Ujian Online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-6xl mx-auto p-8">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Nilai Ujian Peserta</h1>
+      <p class="text-gray-600">Berikut adalah rekapitulasi nilai dari semua peserta ujian.</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-800 text-white">
+          <tr id="tableHeader">
+            <!-- Headers will be dynamically inserted here -->
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Data rows will be dynamically inserted here -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8 text-center">
+      <button 
+        onclick="window.print()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 transform hover:scale-105 mr-2"
+      >
+        🖨️ Cetak Daftar Nilai
+      </button>
+      <button 
+        onclick="logout()" 
+        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 transform hover:scale-105"
+      >
+        Logout
+      </button>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
+      <p>Sistem Ujian Online © 2025</p>
+    </div>
+  </div>
+
+  <script>
+    function logout() {
+        const sessionId = sessionStorage.getItem('sessionId');
+        sessionStorage.clear();
+        if (sessionId) {
+            google.script.run.clearSession(sessionId);
+        }
+        google.script.run.withSuccessHandler(function(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_top';
+            document.body.appendChild(a);
+            a.click();
+            a.parentNode.removeChild(a);
+        }).getScriptUrl();
+    }
+
+    function loadDaftarNilai() {
+        const sessionId = sessionStorage.getItem('sessionId');
+        if (!sessionId) {
+            alert('Sesi tidak valid atau telah berakhir. Silakan login kembali.');
+            logout();
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(response => {
+                if (response.success) {
+                    const headers = response.headers;
+                    const data = response.data;
+                    const tableHeader = document.getElementById('tableHeader');
+                    const tableBody = document.getElementById('tableBody');
+
+                    // Clear previous content
+                    tableHeader.innerHTML = '';
+                    tableBody.innerHTML = '';
+
+                    // Create table headers
+                    headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.className = 'text-left py-3 px-4 uppercase font-semibold text-sm';
+                        th.textContent = headerText;
+                        tableHeader.appendChild(th);
+                    });
+
+                    // Create table rows
+                    data.forEach(rowData => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-gray-200 hover:bg-gray-100';
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.className = 'py-3 px-4';
+                            td.textContent = cellData;
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    });
+
+                } else {
+                    alert('Gagal memuat daftar nilai: ' + response.message);
+                }
+            })
+            .withFailureHandler(err => {
+                alert('Terjadi kesalahan saat memuat daftar nilai: ' + err.message);
+            })
+            .getHasilUjian(sessionId);
+    }
+
+    // Load the data when the page is ready
+    document.addEventListener('DOMContentLoaded', loadDaftarNilai);
+  </script>
+
+  <style>
+    @media print {
+      body {
+        background: white !important;
+        padding: 0;
+      }
+      .bg-white {
+        box-shadow: none !important;
+        border: 1px solid #ccc;
+        max-width: 100%;
+      }
+      button {
+        display: none !important;
+      }
+    }
+  </style>
+</body>
+</html>

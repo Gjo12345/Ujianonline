@@ -1,0 +1,3118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs-toast@latest/dist/cdn.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #3b49df;
+      --primary-dark: #2e3b87;
+      --secondary: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --purple: #a855f7;
+      --orange: #f97316;
+      --pink: #ec4899;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --border: #e2e8f0;
+      --shadow: rgba(0, 0, 0, 0.08);
+      --sidebar-width: 260px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #2e3b87 0%, #1e2870 100%);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .sidebar-header {
+      padding: 2rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem; /* Adjust icon size */
+      color: var(--primary); /* Use primary color for the icon */
+    }
+
+    .logo-text h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.25rem;
+    }
+
+    .logo-text p {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .sidebar-nav {
+      padding: 1.5rem 0;
+    }
+
+    .nav-section {
+      margin-bottom: 2rem;
+    }
+
+    .nav-label {
+      padding: 0 1.5rem;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .nav-item {
+      padding: 0.875rem 1.5rem;
+      margin: 0.25rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.9375rem;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-item i {
+      width: 20px;
+      font-size: 1.125rem;
+      text-align: center;
+    }
+
+    .nav-item .badge {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.125rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+    }
+
+    .nav-item.logout {
+      color: #fca5a5;
+      margin-top: 1rem;
+    }
+
+    .nav-item.logout:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      transition: margin-left 0.3s ease;
+      background: #f5f7fa;
+      min-width: 0; /* Fix for flexbox overflow */
+    }
+
+    .main-content.full-width {
+      margin-left: 0;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: white;
+      padding: 1.25rem 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--dark);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: var(--light);
+    }
+
+    .topbar h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .time-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--light);
+      border-radius: 10px;
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
+
+    .time-badge i {
+      color: var(--primary);
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .user-menu:hover {
+      background: var(--light);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info span {
+      display: block;
+      text-align: left;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.9375rem;
+    }
+
+    .user-role {
+      color: var(--gray);
+      font-size: 0.75rem;
+    }
+
+    /* Content Area */
+    .content {
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+      color: var(--gray);
+      font-size: 0.9375rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-color);
+    }
+
+    .stat-card.green::before { background: #10b981; }
+    .stat-card.purple::before { background: #a855f7; }
+    .stat-card.orange::before { background: #f97316; }
+    .stat-card.blue::before { background: #3b82f6; }
+    .stat-card.pink::before { background: #ec4899; }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .stat-info h3 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      line-height: 1;
+    }
+
+    .stat-info p {
+      color: var(--gray);
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+
+    .stat-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-icon.purple { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .stat-icon.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+    .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .stat-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+
+    .stat-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--gray);
+      font-weight: 500;
+    }
+
+    .stat-footer i {
+      color: var(--primary);
+    }
+
+    /* Main Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .card-header h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .card-header .badge {
+      padding: 0.375rem 0.875rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--light);
+      color: var(--primary);
+    }
+
+    .card-body {
+      color: var(--gray);
+      line-height: 1.7;
+    }
+
+    .feature-list {
+      list-style: none;
+    }
+
+    .feature-list li {
+      padding: 0.875rem 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--dark);
+      font-weight: 500;
+      font-size: 0.9375rem;
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    .feature-list i {
+      color: var(--success);
+      font-size: 1.125rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* Table Styles */
+    .table-container {
+      background: white;
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .table-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9375rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b49df, #5865f2);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 73, 223, 0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--light);
+    }
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--border);
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--dark);
+      font-size: 0.9375rem;
+    }
+
+    tbody tr:hover {
+      background: var(--light);
+    }
+
+    .status-badge {
+      padding: 0.375rem 0.875rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-success {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .status-warning {
+      background: #fed7aa;
+      color: #d97706;
+    }
+
+    .status-danger {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.9375rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      transition: all 0.2s ease;
+      color: var(--dark);
+      font-family: inherit;
+    }
+
+    .form-control::placeholder {
+      color: var(--gray);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 73, 223, 0.1);
+    }
+
+    .form-control option {
+      background: white;
+      color: var(--dark);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .close-modal {
+      background: var(--light);
+      border: none;
+      font-size: 1.25rem;
+      color: var(--dark);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal:hover {
+      background: var(--border);
+      transform: rotate(90deg);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Loading State */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Chart container */
+    .chart-container {
+      background: white;
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-placeholder {
+      height: 300px;
+      background: var(--light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      border: 2px dashed var(--border);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .topbar {
+        padding: 1rem;
+      }
+
+      .topbar h1 {
+        font-size: 1.25rem;
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .user-info, .time-badge {
+        display: none;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Overlay for mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* Page specific styles */
+    .page-content {
+      display: none;
+    }
+
+    .page-content.active {
+      display: block;
+    }
+
+    /* Alpine Toast Notification Styles */
+    .toast-container {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+    }
+    .toast-item {
+      background-color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-left: 4px solid;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease-in-out;
+    }
+    .toast-item.toast-success { border-color: var(--success); }
+    .toast-item.toast-error { border-color: var(--danger); }
+    .toast-item.toast-warning { border-color: var(--warning); }
+    .toast-item.toast-info { border-color: var(--info); }
+    .toast-item-icon {
+      font-size: 1.5rem;
+    }
+    .toast-item-icon-success { color: var(--success); }
+    .toast-item-icon-error { color: var(--danger); }
+    .toast-item-icon-warning { color: var(--warning); }
+    .toast-item-icon-info { color: var(--info); }
+    .toast-item-content {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    .toast-item-close {
+      background: none;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      font-size: 1.25rem;
+      margin-left: 1rem;
+    }
+    .toast-item.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .table-controls .form-group {
+      margin-bottom: 0;
+    }
+
+    .table-controls .form-control {
+      width: auto;
+      min-width: 250px;
+    }
+
+    .table-controls .show-entries {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .table-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .pagination-info {
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
+
+    .pagination-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .pagination-buttons .btn {
+      padding: 0.5rem 1rem;
+    }
+
+    .pagination-buttons .btn:disabled {
+      background: var(--light);
+      color: var(--gray);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .logo-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 12px;
+      border: 2px dashed var(--border);
+      margin-top: 1rem;
+      object-fit: cover;
+      background-color: var(--light);
+    }
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 9998; /* Below toast, above everything else */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      color: var(--dark);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div x-data x-toast></div>
+  <div class="overlay" id="overlay"></div>
+  
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner" style="width: 40px; height: 40px; border-width: 4px;"></div>
+    <p id="loadingMessage">Memuat...</p>
+  </div>
+
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <i class="fas fa-graduation-cap logo-icon" id="sidebarLogo"></i>
+          <div class="logo-text">
+            <h2 id="sidebarTitle">Admin Ujian</h2>
+            <p>Sistem Ujian Online</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-label">Menu Utama</div>
+          <div class="nav-item active" data-page="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </div>
+
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Kelola Data</div>
+          <div class="nav-item" data-page="peserta">
+            <i class="fas fa-users"></i>
+            <span>Data Peserta</span>
+          </div>
+          <div class="nav-item" data-page="soal">
+            <i class="fas fa-file-alt"></i>
+            <span>Data Soal</span>
+          </div>
+          <div class="nav-item" data-page="hasil">
+            <i class="fas fa-clipboard-check"></i>
+            <span>Hasil Ujian</span>
+          </div>
+
+          <div class="nav-item" data-page="rekap">
+            <i class="fas fa-history"></i>
+            <span>Rekap Jawaban</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Pengaturan</div>
+          <div class="nav-item" data-page="konfigurasi">
+            <i class="fas fa-cog"></i>
+            <span>Konfigurasi</span>
+          </div>
+          <div class="nav-item logout" id="btnLogoutSidebar">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+
+        <div class="topbar-right">
+          <div class="time-badge">
+            <i class="fas fa-clock"></i>
+            <span id="currentTime">Loading...</span>
+          </div>
+          <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+              <span class="user-name" id="adminUserName">Admin</span>
+              <span class="user-role">Administrator</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Dashboard Page -->
+        <div class="page-content active" id="page-dashboard">
+          <div class="page-header">
+            <h2>Selamat Datang, <span id="welcomeName">Admin</span>!</h2>
+            <p>Kelola sistem ujian online dengan mudah dan efisien</p>
+
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card green">
+              <div class="stat-header">
+                <div class="stat-info">
+                  <h3 id="totalPeserta">0</h3>
+                  <p>Peserta Terdaftar</p>
+                </div>
+                <div class="stat-icon green">
+                  <i class="fas fa-users"></i>
+                </div>
+              </div>
+              <div class="stat-footer">
+                <i class="fas fa-user-check"></i>
+                <span>Total peserta aktif</span>
+              </div>
+            </div>
+
+            <div class="stat-card purple">
+              <div class="stat-header">
+                <div class="stat-info">
+                  <h3 id="totalMapel">3</h3>
+                  <p>Mata Pelajaran</p>
+                </div>
+                <div class="stat-icon purple">
+                  <i class="fas fa-book"></i>
+                </div>
+              </div>
+              <div class="stat-footer">
+                <i class="fas fa-check-circle"></i>
+                <span>Aktif</span>
+              </div>
+            </div>
+
+            <div class="stat-card orange">
+              <div class="stat-header">
+                <div class="stat-info">
+                  <h3 id="totalSoal">0</h3>
+                  <p>Total Soal</p>
+                </div>
+                <div class="stat-icon orange">
+                  <i class="fas fa-question-circle"></i>
+                </div>
+              </div>
+              <div class="stat-footer">
+                <i class="fas fa-database"></i>
+                <span>Semua mata pelajaran</span>
+              </div>
+            </div>
+
+            <div class="stat-card blue">
+              <div class="stat-header">
+                <div class="stat-info">
+                  <h3 id="ujianSelesai">0</h3>
+                  <p>Ujian Selesai</p>
+                </div>
+                <div class="stat-icon blue">
+                  <i class="fas fa-clipboard-check"></i>
+                </div>
+              </div>
+              <div class="stat-footer">
+                <i class="fas fa-sync-alt"></i>
+                <span>Update real-time</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cards-grid">
+            <div class="card">
+              <div class="card-header">
+                <h3>Fitur Sistem</h3>
+                <span class="badge">Lengkap</span>
+              </div>
+              <div class="card-body">
+                <ul class="feature-list">
+                  <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Manajemen peserta dan soal ujian</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Penilaian otomatis untuk pilihan ganda</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Review jawaban esai peserta</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Laporan hasil ujian komprehensif</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Keamanan dengan PIN sesi</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Panduan Cepat</h3>
+                <span class="badge">Tutorial</span>
+              </div>
+              <div class="card-body">
+                <ul class="feature-list">
+                  <li>
+                    <i class="fas fa-user-plus"></i>
+                    <span>Tambahkan peserta melalui menu Data Peserta</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-file-plus"></i>
+                    <span>Kelola soal ujian di menu Data Soal</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-eye"></i>
+                    <span>Pantau hasil ujian secara real-time</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-pen-square"></i>
+                    <span>Nilai jawaban esai di menu khusus</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-cog"></i>
+                    <span>Atur PIN sesi di menu Konfigurasi</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Data Peserta Page -->
+        <div class="page-content" id="page-peserta">
+          <div class="page-header">
+            <h2>Data Peserta</h2>
+            <p>Kelola data peserta ujian</p>
+          </div>
+
+          <div class="table-container">
+            <div class="table-header">
+              <h3 class="table-title">Daftar Peserta</h3>
+              <button class="btn btn-primary" onclick="openAddPesertaModal()">
+                <i class="fas fa-plus"></i>
+                Tambah Peserta
+              </button>
+            </div>
+
+            <div class="table-controls">
+              <div class="show-entries">
+                <label for="pesertaShowEntries" class="form-label" style="margin-bottom: 0;">Tampilkan</label>
+                <select id="pesertaShowEntries" class="form-control" style="width: auto;">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="all">Semua</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <input type="text" id="pesertaSearchInput" class="form-control" placeholder="Cari (No Peserta/Nama)...">
+              </div>
+            </div>
+
+            <table id="tablePeserta">
+              <thead>
+                <tr>
+                  <th>No Peserta</th>
+                  <th>Nama Lengkap</th>
+                  <th>Password</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="pesertaTableBody">
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Memuat data...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="table-pagination">
+              <div id="pesertaPaginationInfo" class="pagination-info"></div>
+              <div id="pesertaPaginationButtons" class="pagination-buttons"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Soal Page -->
+        <div class="page-content" id="page-soal">
+          <div class="page-header">
+            <h2>Data Soal</h2>
+            <p>Kelola soal ujian per mata pelajaran</p>
+          </div>
+
+          <div class="table-container" style="margin-bottom: 1.5rem;">
+            <div class="table-header">
+              <h3 class="table-title">Pilih Mata Pelajaran</h3>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <select class="form-control" id="selectMapel" onchange="loadSoalByMapel()">
+                <option value="">-- Memuat Mata Pelajaran... --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container" id="soalTableContainer" style="display: none;">
+            <div class="table-header">
+              <h3 class="table-title">Daftar Soal - <span id="namaMapel"></span></h3>
+              <button class="btn btn-primary" onclick="openAddSoalModal()">
+                <i class="fas fa-plus"></i>
+                Tambah Soal
+              </button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tipe</th>
+                  <th>Pertanyaan</th>
+                  <th>Opsi A</th>
+                  <th>Opsi B</th>
+                  <th>Opsi C</th>
+                  <th>Opsi D</th>
+                  <th>Jawaban</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="soalTableBody">
+                <tr>
+                  <td colspan="10" class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <p>Pilih mata pelajaran untuk melihat soal</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Hasil Ujian Page -->
+        <div class="page-content" id="page-hasil">
+          <div class="page-header">
+            <h2>Hasil Ujian</h2>
+            <p>Lihat hasil ujian semua peserta</p>
+          </div>
+
+          <div class="table-container">
+            <div class="table-header">
+              <h3 class="table-title">Rekap Hasil Ujian</h3>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="btn btn-success" onclick="loadHasil()">
+                  <i class="fas fa-sync"></i>
+                  Refresh
+                </button>
+                <button id="btnSimpanEsai" class="btn btn-primary" onclick="simpanNilaiEsai()">
+                  <i class="fas fa-save"></i>
+                  Simpan Nilai Esai
+                </button>
+              </div>
+            </div>
+
+            <div class="table-controls">
+              <div class="show-entries">
+                <label for="showEntries" class="form-label" style="margin-bottom: 0;">Tampilkan</label>
+                <select id="showEntries" class="form-control" style="width: auto;">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="all">Semua</option>
+                </select>
+              </div>
+              <div class="show-entries">
+                <label for="statusFilter" class="form-label" style="margin-bottom: 0;">Status</label>
+                <select id="statusFilter" class="form-control" style="width: auto;">
+                  <option value="">Semua</option>
+                  <option value="Selesai">Selesai</option>
+                  <option value="Ujian Ulang">Ujian Ulang</option>
+                  <option value="Belum Selesai">Belum Selesai</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Cari (No Peserta/Nama)...">
+              </div>
+            </div>
+
+            <div class="table-wrapper" style="overflow-x: auto;">
+              <table>
+                <thead id="hasilTableHead">
+                </thead>
+                <tbody id="hasilTableBody">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <p>Memuat data...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-pagination">
+              <div id="paginationInfo" class="pagination-info"></div>
+              <div id="paginationButtons" class="pagination-buttons"></div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Rekap Jawaban Page -->
+        <div class="page-content" id="page-rekap">
+          <div class="page-header">
+            <h2>Rekap Jawaban Peserta</h2>
+            <p>Lihat riwayat jawaban mentah dari semua peserta.</p>
+          </div>
+          <div class="table-container">
+            <div class="table-header">
+              <h3 class="table-title">Rekap Jawaban</h3>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="btn btn-success" onclick="loadRekap()">
+                  <i class="fas fa-sync"></i>
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <div class="table-controls">
+              <div class="show-entries">
+                <label for="rekapShowEntries" class="form-label" style="margin-bottom: 0;">Tampilkan</label>
+                <select id="rekapShowEntries" class="form-control" style="width: auto;">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="all">Semua</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <input type="text" id="rekapSearchInput" class="form-control" placeholder="Cari (No Peserta/Nama)...">
+              </div>
+            </div>
+
+            <div class="table-wrapper" style="overflow-x: auto;">
+              <table>
+                <thead id="rekapTableHead">
+                </thead>
+                <tbody id="rekapTableBody">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <p>Memuat data...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-pagination">
+              <div id="rekapPaginationInfo" class="pagination-info"></div>
+              <div id="rekapPaginationButtons" class="pagination-buttons"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Konfigurasi Page -->
+        <div class="page-content" id="page-konfigurasi">
+          <div class="page-header">
+            <h2>Konfigurasi Sistem</h2>
+            <p>Atur pengaturan sistem ujian</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Pengaturan Umum</h3>
+            </div>
+            <div class="card-body">
+              <form id="configForm">
+                <div class="form-group">
+                  <label class="form-label">PIN Sesi Ujian</label>
+                  <p style="font-size: 0.875rem; color: var(--gray);">PIN Saat Ini: <strong id="currentPinText" style="color: var(--dark);">Memuat...</strong></p>
+                  <input type="text" class="form-control" id="pinSesi" placeholder="Masukkan PIN baru atau kosongkan">
+                  <small style="color: var(--gray); display: block; margin-top: 0.5rem;">PIN yang harus dimasukkan peserta saat login. Kosongkan jika tidak ingin mengubah.</small>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Waktu Ujian (menit)</label>
+                  <input type="number" class="form-control" id="waktuUjian" placeholder="Contoh: 30">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Username Admin</label>
+                    <input type="text" class="form-control" id="adminUsernameConfig" placeholder="Username Admin">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Password Admin</label>
+                    <input type="password" class="form-control" id="adminPasswordConfig" placeholder="Kosongkan jika tidak ingin diubah">
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="saveGeneralConfig()" style="margin-top: 1rem;">
+                  <i class="fas fa-save"></i>
+                  Simpan Pengaturan Umum
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+              <h3>Pengaturan Halaman Login</h3>
+            </div>
+            <div class="card-body">
+              <form id="loginConfigForm">
+                <div class="form-group">
+                  <label class="form-label">Judul Halaman Login</label>
+                  <input type="text" class="form-control" id="loginTitle" placeholder="Contoh: Ujian Online 2025">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Sub Judul Halaman Login</label>
+                  <input type="text" class="form-control" id="loginSubtitle" placeholder="Contoh: Sistem Ujian Online Kota Bengkulu">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Logo Halaman Login</label>
+                  <input type="file" class="form-control" id="loginLogoInput" accept="image/*">
+                  <small style="color: var(--gray); display: block; margin-top: 0.5rem;">Pilih file gambar (PNG, JPG, dll). Logo saat ini:</small>
+                  <img id="logoPreview" src="" alt="Logo Preview" class="logo-preview">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="saveLoginConfig()" style="margin-top: 1rem;">
+                  <i class="fas fa-save"></i>
+                  Simpan Pengaturan Login
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Tambah Peserta -->
+  <div class="modal" id="modalAddPeserta">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Tambah Peserta Baru</h3>
+        <button class="close-modal" onclick="closeModal('modalAddPeserta')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="formAddPeserta">
+        <div class="form-group">
+          <label class="form-label">Nomor Peserta</label>
+          <input type="text" class="form-control" id="noPesertaAdd" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <input type="text" class="form-control" id="namaPesertaAdd" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="text" class="form-control" id="passwordPesertaAdd" required>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+          <button type="button" class="btn btn-primary" onclick="addPeserta()" style="flex: 1;">
+            <i class="fas fa-save"></i>
+            Simpan
+          </button>
+          <button type="button" class="btn btn-danger" onclick="closeModal('modalAddPeserta')" style="flex: 1;">
+            <i class="fas fa-times"></i>
+            Batal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Edit Peserta -->
+  <div class="modal" id="modalEditPeserta">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Data Peserta</h3>
+        <button class="close-modal" onclick="closeModal('modalEditPeserta')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="formEditPeserta">
+        <input type="hidden" id="originalNoPesertaEdit">
+        <div class="form-group">
+          <label class="form-label">Nomor Peserta</label>
+          <input type="text" class="form-control" id="noPesertaEdit" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <input type="text" class="form-control" id="namaPesertaEdit" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="text" class="form-control" id="passwordPesertaEdit" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="statusPesertaEdit">
+            <option value="aktif">aktif</option>
+            <option value="tidak aktif">tidak aktif</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+          <button type="button" class="btn btn-primary" id="btnEditPeserta" onclick="editPeserta()" style="flex: 1;">
+            <i class="fas fa-save"></i>
+            Simpan Perubahan
+          </button>
+          <button type="button" class="btn btn-danger" onclick="closeModal('modalEditPeserta')" style="flex: 1;">
+            <i class="fas fa-times"></i>
+            Batal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Tambah Soal -->
+  <div class="modal" id="modalAddSoal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Tambah Soal Baru</h3>
+        <button class="close-modal" onclick="closeModal('modalAddSoal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="formAddSoal">
+        <input type="hidden" id="originalNoSoal">
+        <div class="form-group">
+          <label class="form-label">Nomor Soal</label>
+          <input type="number" class="form-control" id="noSoalAdd" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipe Soal</label>
+          <select class="form-control" id="tipeSoalAdd" onchange="toggleOpsiSoal()" required>
+            <option value="Pilihan Ganda">Pilihan Ganda</option>
+            <option value="Esai">Esai</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pertanyaan</label>
+          <textarea class="form-control" id="pertanyaanSoalAdd" rows="3" required></textarea>
+        </div>
+        <div id="opsiPilihanGanda">
+          <div class="form-group">
+            <label class="form-label">Opsi A</label>
+            <input type="text" class="form-control" id="opsiA">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Opsi B</label>
+            <input type="text" class="form-control" id="opsiB">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Opsi C</label>
+            <input type="text" class="form-control" id="opsiC">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Opsi D</label>
+            <input type="text" class="form-control" id="opsiD">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Opsi E</label>
+            <input type="text" class="form-control" id="opsiE">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jawaban Benar</label>
+            <select class="form-control" id="jawabanBenar">
+              <option value="Jawaban A">Jawaban A</option>
+              <option value="Jawaban B">Jawaban B</option>
+              <option value="Jawaban C">Jawaban C</option>
+              <option value="Jawaban D">Jawaban D</option>
+              <option value="Jawaban E">Jawaban E</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-primary" onclick="addSoal()" style="flex: 1;">
+            <i class="fas fa-save"></i>
+            Simpan
+          </button>
+          <button type="button" class="btn btn-danger" onclick="closeModal('modalAddSoal')" style="flex: 1;">
+            <i class="fas fa-times"></i>
+            Batal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Detail Esai -->
+  <div class="modal" id="modalDetailEsai">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Detail Jawaban Esai</h3>
+        <button class="close-modal" onclick="closeModal('modalDetailEsai')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="detailEsaiContent">
+        <div class="form-group">
+          <label class="form-label">Pertanyaan</label>
+          <p id="esaiPertanyaan" style="padding: 1rem; background: var(--light); border-radius: 10px; color: var(--dark);"></p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jawaban Peserta</label>
+          <p id="esaiJawaban" style="padding: 1rem; background: var(--light); border-radius: 10px; color: var(--dark);"></p>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="closeModal('modalDetailEsai')">
+          <i class="fas fa-check"></i>
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helper for showing toast notifications
+    function showToast(message, type = 'info') {
+      window.dispatchEvent(new CustomEvent('toast', {
+        detail: {
+          text: message,
+          type: type,
+          position: 'top-right',
+        }
+      }));
+    }
+
+    function showLoading(message = 'Memuat...') {
+      document.getElementById('loadingMessage').textContent = message;
+      document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    let currentMapel = '';
+    let isMobile = window.innerWidth <= 768;
+    
+    // Update time display
+    function updateTime() {
+      const now = new Date();
+      const options = { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit'
+      };
+      const timeString = now.toLocaleDateString('id-ID', options);
+      const timeElement = document.getElementById('currentTime');
+      if (timeElement) {
+        timeElement.textContent = timeString;
+      }
+    }
+    
+    // Update time every second
+    setInterval(updateTime, 1000);
+    updateTime();
+    
+    // Check if mobile on resize
+    window.addEventListener('resize', () => {
+      isMobile = window.innerWidth <= 768;
+      if (!isMobile) {
+        overlay.classList.remove('active');
+        sidebar.classList.remove('mobile-open');
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('full-width');
+      }
+    });
+    
+    // Toggle Sidebar
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const overlay = document.getElementById('overlay');
+
+    menuToggle.addEventListener('click', () => {
+      if (isMobile) {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+      } else {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('full-width');
+      }
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('mobile-open');
+      overlay.classList.remove('active');
+    });
+
+    function loadSubjectDropdown() {
+      const select = document.getElementById('selectMapel');
+      // Prevent multiple loads
+      if (select.options.length > 1 && select.options[0].value === '') return;
+
+      const sessionId = sessionStorage.getItem('sessionId');
+      if (!sessionId) {
+        showToast('Sesi tidak valid.', 'error');
+        select.innerHTML = '<option value="">Gagal memuat: Sesi tidak valid</option>';
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            select.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+            response.data.forEach(subject => {
+              const option = document.createElement('option');
+              option.value = subject.value;
+              option.textContent = subject.text;
+              select.appendChild(option);
+            });
+          } else {
+            showToast('Gagal memuat daftar mapel: ' + response.message, 'error');
+            select.innerHTML = `<option value="">Gagal: ${response.message}</option>`;
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Gagal memuat daftar mapel: ' + err.message, 'error');
+          select.innerHTML = `<option value="">Error: ${err.message}</option>`;
+        })
+        .getAllSubjectSheetsForAdmin(sessionId);
+    }
+
+    function handlePdfUrl(response) {
+      if (response.success) {
+        showToast('PDF berhasil dibuat. Membuka di tab baru...', 'success');
+        window.open(response.url, '_blank');
+      } else {
+        showToast('Gagal membuat PDF: ' + response.message, 'error');
+      }
+      hideLoading();
+    }
+
+    // Page Navigation
+    function showPage(pageName) {
+      document.querySelectorAll('.page-content').forEach(page => {
+        page.classList.remove('active');
+      });
+      
+      const selectedPage = document.getElementById(`page-${pageName}`);
+      if (selectedPage) {
+        selectedPage.classList.add('active');
+      }
+      
+      const titles = {
+        'dashboard': 'Dashboard',
+        'peserta': 'Data Peserta',
+        'soal': 'Data Soal',
+        'hasil': 'Hasil Ujian',
+        'rekap': 'Rekap Jawaban',
+        'konfigurasi': 'Konfigurasi'
+      };
+      document.getElementById('pageTitle').textContent = titles[pageName] || 'Dashboard';
+      
+      if (pageName === 'dashboard') {
+        loadDashboardStats();
+      } else if (pageName === 'peserta') {
+        loadPeserta();
+      } else if (pageName === 'soal') {
+        loadSubjectDropdown(); // <-- This is the new call
+      } else if (pageName === 'hasil') {
+        loadHasil();
+      } else if (pageName === 'rekap') {
+        loadRekap();
+      } else if (pageName === 'konfigurasi') {
+        loadConfig();
+      }
+    }
+
+    // Handle Navigation Menu Clicks
+    document.querySelectorAll('.nav-item:not(.logout)').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const page = this.getAttribute('data-page');
+        
+        document.querySelectorAll('.nav-item').forEach(navItem => {
+          navItem.classList.remove('active');
+        });
+        
+        this.classList.add('active');
+        
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('mobile-open');
+          overlay.classList.remove('active');
+        }
+        
+        if (page) {
+          showPage(page);
+        }
+      });
+    });
+
+    // Logout Function
+    function logout() {
+      const sessionId = sessionStorage.getItem('sessionId');
+      sessionStorage.clear();
+      if (sessionId) {
+        google.script.run.clearSession(sessionId);
+      }
+      // Redirect to the main page, which will default to the login page
+      google.script.run.withSuccessHandler(function(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_top';
+        document.body.appendChild(a);
+        a.click();
+        a.parentNode.removeChild(a);
+      }).getScriptUrl();
+    }
+
+    // Validate Admin Session
+    function validateAdminSession() {
+      const sessionId = sessionStorage.getItem('sessionId');
+      const adminData = JSON.parse(sessionStorage.getItem('admin'));
+
+      if (!sessionId) {
+        logout();
+        return;
+      }
+
+      if (adminData && adminData.role === 'admin') {
+        document.getElementById('adminUserName').textContent = adminData.username;
+        document.getElementById('welcomeName').textContent = adminData.username;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (!response.success || !response.data || response.data.role !== 'admin') {
+            showToast('Sesi admin tidak valid atau telah berakhir. Silakan login kembali.', 'error');
+            setTimeout(logout, 3000);
+          } else {
+            document.getElementById('adminUserName').textContent = response.data.username;
+            document.getElementById('welcomeName').textContent = response.data.username;
+            sessionStorage.setItem('admin', JSON.stringify(response.data));
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Gagal memvalidasi sesi: ' + err.message, 'error');
+          setTimeout(logout, 3000);
+        })
+        .getUserSession(sessionId);
+    }
+
+    // Load Dashboard Stats
+    function loadDashboardStats() {
+      document.getElementById('totalPeserta').innerHTML = '<div class="loading-spinner"></div>';
+      document.getElementById('totalMapel').innerHTML = '<div class="loading-spinner"></div>'; // Add loading for totalMapel
+      document.getElementById('totalSoal').innerHTML = '<div class="loading-spinner"></div>';
+      document.getElementById('ujianSelesai').innerHTML = '<div class="loading-spinner"></div>';
+      
+      const sessionId = sessionStorage.getItem('sessionId');
+      if (!sessionId) {
+        showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            document.getElementById('totalPeserta').textContent = response.data.totalPeserta;
+            document.getElementById('totalMapel').textContent = response.data.totalMapel; // Update totalMapel
+            document.getElementById('totalSoal').textContent = response.data.totalSoal;
+            document.getElementById('ujianSelesai').textContent = response.data.ujianSelesai;
+          } else {
+            showToast('Gagal memuat statistik dashboard: ' + response.message, 'error');
+            document.getElementById('totalPeserta').textContent = 'Error';
+            document.getElementById('totalMapel').textContent = 'Error'; // Set error for totalMapel
+            document.getElementById('totalSoal').textContent = 'Error';
+            document.getElementById('ujianSelesai').textContent = 'Error';
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Gagal memuat statistik dashboard: ' + err.message, 'error');
+          document.getElementById('totalPeserta').textContent = 'Error';
+          document.getElementById('totalMapel').textContent = 'Error'; // Set error for totalMapel
+          document.getElementById('totalSoal').textContent = 'Error';
+          document.getElementById('ujianSelesai').textContent = 'Error';
+        })
+        .getDashboardStats(sessionId);
+    }
+
+    // Load Peserta Data
+    let pesertaData = [];
+    let filteredPesertaData = [];
+    let pesertaCurrentPage = 1;
+    let pesertaEntriesPerPage = 10;
+
+    function renderPesertaTable() {
+      const searchTerm = document.getElementById('pesertaSearchInput').value.toLowerCase();
+      pesertaEntriesPerPage = document.getElementById('pesertaShowEntries').value;
+
+      // Filter data
+      filteredPesertaData = pesertaData.filter(p => 
+        p.noPeserta.toLowerCase().includes(searchTerm) || 
+        p.nama.toLowerCase().includes(searchTerm)
+      );
+
+      // Pagination
+      const totalEntries = filteredPesertaData.length;
+      const totalPages = pesertaEntriesPerPage === 'all' ? 1 : Math.ceil(totalEntries / pesertaEntriesPerPage);
+      pesertaCurrentPage = Math.max(1, Math.min(pesertaCurrentPage, totalPages));
+      
+      const start = pesertaEntriesPerPage === 'all' ? 0 : (pesertaCurrentPage - 1) * pesertaEntriesPerPage;
+      const end = pesertaEntriesPerPage === 'all' ? totalEntries : start + pesertaEntriesPerPage;
+      const paginatedData = filteredPesertaData.slice(start, end);
+
+      // Render table
+      const tbody = document.getElementById('pesertaTableBody');
+      tbody.innerHTML = '';
+
+      if (paginatedData.length > 0) {
+        paginatedData.forEach(p => {
+          const row = `
+            <tr>
+              <td>${p.noPeserta}</td>
+              <td>${p.nama}</td>
+              <td>${p.password}</td>
+              <td><span class="status-badge ${p.status === 'aktif' ? 'status-success' : 'status-danger'}">${p.status}</span></td>
+              <td>
+                <button class="btn btn-sm btn-warning" onclick="openEditPesertaModal('${p.noPeserta}', '${p.nama}', '${p.password}', '${p.status}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deletePeserta('${p.noPeserta}')"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-search"></i><p>Tidak ada data yang cocok.</p></td></tr>';
+      }
+
+      // Render pagination
+      renderPesertaPagination(totalEntries, start, end, totalPages);
+    }
+
+    function renderPesertaPagination(totalEntries, start, end, totalPages) {
+      const info = document.getElementById('pesertaPaginationInfo');
+      const buttons = document.getElementById('pesertaPaginationButtons');
+      
+      if (totalEntries > 0) {
+        info.textContent = `Menampilkan ${start + 1} sampai ${Math.min(end, totalEntries)} dari ${totalEntries} data`;
+      } else {
+        info.textContent = 'Tidak ada data';
+      }
+
+      buttons.innerHTML = '';
+      if (totalPages > 1) {
+        const prevButton = document.createElement('button');
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevButton.className = 'btn';
+        prevButton.disabled = pesertaCurrentPage === 1;
+        prevButton.onclick = () => {
+          pesertaCurrentPage--;
+          renderPesertaTable();
+        };
+        buttons.appendChild(prevButton);
+
+        const nextButton = document.createElement('button');
+        nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextButton.className = 'btn';
+        nextButton.disabled = pesertaCurrentPage === totalPages;
+        nextButton.onclick = () => {
+          pesertaCurrentPage++;
+          renderPesertaTable();
+        };
+        buttons.appendChild(nextButton);
+      }
+    }
+
+    function loadPeserta() {
+      const tbody = document.getElementById('pesertaTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat data...</p></td></tr>';
+      
+      const sessionId = sessionStorage.getItem('sessionId');
+      if (!sessionId) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Sesi tidak valid. Silakan login kembali.</p></td></tr>';
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            pesertaData = response.data;
+            pesertaCurrentPage = 1;
+            renderPesertaTable();
+          } else {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${response.message}</p></td></tr>`;
+            showToast(response.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Gagal memuat data: ${err.message}</p></td></tr>`;
+          showToast('Gagal memuat data: ' + err.message, 'error');
+        })
+        .getPesertaList(sessionId);
+    }
+
+    document.getElementById('pesertaSearchInput').addEventListener('input', () => {
+      pesertaCurrentPage = 1;
+      renderPesertaTable();
+    });
+    document.getElementById('pesertaShowEntries').addEventListener('change', () => {
+      pesertaCurrentPage = 1;
+      renderPesertaTable();
+    });
+
+    // Load Soal by Mapel
+    function loadSoalByMapel() {
+      const mapel = document.getElementById('selectMapel').value;
+      currentMapel = mapel;
+      
+      if (!mapel) {
+        document.getElementById('soalTableContainer').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('soalTableContainer').style.display = 'block';
+      const mapelName = mapel.replace('soal_', '').replace(/_/g, ' ');
+      document.getElementById('namaMapel').textContent = mapelName.charAt(0).toUpperCase() + mapelName.slice(1);
+      
+      const tbody = document.getElementById('soalTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat data...</p></td></tr>';
+      
+      const sessionId = sessionStorage.getItem('sessionId');
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            const soalList = response.data;
+            if (soalList.length > 0) {
+              tbody.innerHTML = '';
+              soalList.forEach(s => {
+                // Truncate long question text for display
+                const pertanyaanSingkat = s.pertanyaan.length > 100 ? s.pertanyaan.substring(0, 100) + '...' : s.pertanyaan;
+
+                const row = `
+                  <tr>
+                    <td>${s.no}</td>
+                    <td><span class="status-badge ${s.tipe === 'Pilihan Ganda' ? 'status-success' : 'status-warning'}">${s.tipe}</span></td>
+                    <td>${pertanyaanSingkat}</td>
+                    <td>${s.opsiA || '-'}</td>
+                    <td>${s.opsiB || '-'}</td>
+                    <td>${s.opsiC || '-'}</td>
+                    <td>${s.opsiD || '-'}</td>
+                    <td>${s.opsiE || '-'}</td>
+                    <td>${s.jawaban}</td>
+                    <td>
+                      <button class="btn btn-sm btn-warning" onclick="editSoal('${s.no}', '${currentMapel}')"><i class="fas fa-edit"></i></button>
+                      <button class="btn btn-sm btn-danger" onclick="deleteSoal('${s.no}', '${currentMapel}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                `;
+                tbody.innerHTML += row;
+              });
+            } else {
+              tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-file-alt"></i><p>Belum ada soal. Klik tombol "Tambah Soal" untuk menambah soal.</p></td></tr>';
+            }
+          } else {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${response.message}</p></td></tr>`;
+            showToast(response.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Gagal memuat soal: ${err.message}</p></td></tr>`;
+          showToast('Gagal memuat soal: ' + err.message, 'error');
+        })
+        .getSoalList(sessionId, mapel);
+    }
+
+    // --- Hasil Ujian Table Logic ---
+    let hasilData = [];
+    let filteredHasilData = [];
+    let currentPage = 1;
+    let entriesPerPage = 10;
+    let hasilHeaders = [];
+
+    function renderHasilTable() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      entriesPerPage = document.getElementById('showEntries').value;
+
+      // Filter data
+      const statusUjianColIndex = hasilHeaders.indexOf('Status Ujian');
+      filteredHasilData = hasilData.filter(row => {
+        const noPeserta = row[hasilHeaders.indexOf('Nomor Peserta')]?.toString().toLowerCase() || '';
+        const nama = row[hasilHeaders.indexOf('Nama Peserta')]?.toString().toLowerCase() || '';
+        const statusUjian = statusUjianColIndex > -1 ? row[statusUjianColIndex] : '';
+
+        const searchMatch = noPeserta.includes(searchTerm) || nama.includes(searchTerm);
+        
+        let statusMatch = true;
+        if (statusFilter) {
+          if (statusFilter === 'Belum Selesai') {
+            statusMatch = !statusUjian || (statusUjian !== 'Selesai' && statusUjian !== 'Ujian Ulang');
+          } else {
+            statusMatch = statusUjian === statusFilter;
+          }
+        }
+
+        return searchMatch && statusMatch;
+      });
+
+      // Pagination
+      const totalEntries = filteredHasilData.length;
+      const totalPages = entriesPerPage === 'all' ? 1 : Math.ceil(totalEntries / entriesPerPage);
+      currentPage = Math.max(1, Math.min(currentPage, totalPages));
+      
+      const start = entriesPerPage === 'all' ? 0 : (currentPage - 1) * entriesPerPage;
+      const end = entriesPerPage === 'all' ? totalEntries : start + entriesPerPage;
+      const paginatedData = filteredHasilData.slice(start, end);
+
+      // ==> PERBAIKAN: Render header
+      const thead = document.getElementById('hasilTableHead');
+      thead.innerHTML = ''; // Kosongkan header sebelumnya
+      if (hasilHeaders.length > 0) {
+        let headerHtml = '<tr>';
+        hasilHeaders.forEach(header => {
+          headerHtml += `<th>${header}</th>`;
+        });
+        headerHtml += `<th>Aksi</th>`; // Tambah header Aksi
+        headerHtml += '</tr>';
+        thead.innerHTML = headerHtml;
+      }
+      // <== AKHIR PERBAIKAN
+
+      // Render table
+      const tbody = document.getElementById('hasilTableBody');
+      tbody.innerHTML = '';
+
+      if (paginatedData.length > 0) {
+        const nilaiEsaiColIndex = hasilHeaders.indexOf('Nilai Esai');
+        const noPesertaColIndex = hasilHeaders.indexOf('Nomor Peserta');
+
+        paginatedData.forEach(row => {
+          const noPeserta = row[noPesertaColIndex];
+          let rowHtml = '<tr>';
+          row.forEach((cell, index) => {
+            if (index === nilaiEsaiColIndex) {
+              const currentValue = cell || '';
+              rowHtml += `<td><input type="number" class="form-control essay-score-input" value="${currentValue}" data-peserta="${noPeserta}" style="width: 90px; padding: 0.375rem 0.75rem;"></td>`;
+            } else {
+              rowHtml += `<td>${cell}</td>`;
+            }
+          });
+          // Tambah tombol Aksi
+          rowHtml += `<td><button class="btn btn-sm btn-warning" onclick="requestRetakeExam('${noPeserta}')"><i class="fas fa-redo"></i> Ujian Ulang</button></td>`;
+          rowHtml += '</tr>';
+          tbody.innerHTML += rowHtml;
+        });
+      } else {
+        const colspan = (hasilHeaders.length || 0) + 1;
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="empty-state"><i class="fas fa-search"></i><p>Tidak ada data yang cocok.</p></td></tr>`;
+      }
+
+      // Render pagination
+      renderPagination(totalEntries, start, end, totalPages);
+    }
+
+    function renderPagination(totalEntries, start, end, totalPages) {
+      const info = document.getElementById('paginationInfo');
+      const buttons = document.getElementById('paginationButtons');
+      
+      if (totalEntries > 0) {
+        info.textContent = `Menampilkan ${start + 1} sampai ${Math.min(end, totalEntries)} dari ${totalEntries} data`;
+      } else {
+        info.textContent = 'Tidak ada data';
+      }
+
+      buttons.innerHTML = '';
+      if (totalPages > 1) {
+        const prevButton = document.createElement('button');
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevButton.className = 'btn';
+        prevButton.disabled = currentPage === 1;
+        prevButton.onclick = () => {
+          currentPage--;
+          renderHasilTable();
+        };
+        buttons.appendChild(prevButton);
+
+        const nextButton = document.createElement('button');
+        nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextButton.className = 'btn';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.onclick = () => {
+          currentPage++;
+          renderHasilTable();
+        };
+        buttons.appendChild(nextButton);
+      }
+    }
+
+    // Load Hasil
+    function loadHasil() {
+      const tbody = document.getElementById('hasilTableBody');
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat data...</p></td></tr>';
+      
+      const sessionId = sessionStorage.getItem('sessionId');
+      if (!sessionId) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Sesi tidak valid.</p></td></tr>';
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            hasilHeaders = response.headers;
+            hasilData = response.data;
+            currentPage = 1; // Reset to first page
+            renderHasilTable();
+          } else {
+            showToast('Gagal memuat hasil: ' + response.message, 'error');
+            document.getElementById('hasilTableBody').innerHTML = `<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${response.message}</p></td></tr>`;
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Gagal memuat hasil: ' + err.message, 'error');
+          document.getElementById('hasilTableBody').innerHTML = `<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Terjadi kesalahan: ${err.message}</p></td></tr>`;
+          }
+        )
+        .getHasilUjian(sessionId);
+    }
+    
+    document.getElementById('searchInput').addEventListener('input', () => {
+      currentPage = 1;
+      renderHasilTable();
+    });
+    document.getElementById('showEntries').addEventListener('change', () => {
+      currentPage = 1;
+      renderHasilTable();
+    });
+    document.getElementById('statusFilter').addEventListener('change', () => {
+      currentPage = 1;
+      renderHasilTable();
+    });
+
+    // --- Rekap Jawaban Table Logic ---
+    let rekapData = [];
+    let filteredRekapData = [];
+    let rekapCurrentPage = 1;
+    let rekapEntriesPerPage = 10;
+    let rekapHeaders = [];
+
+    function renderRekapTable() {
+      const searchTerm = document.getElementById('rekapSearchInput').value.toLowerCase();
+      rekapEntriesPerPage = document.getElementById('rekapShowEntries').value;
+
+      // Filter data
+      filteredRekapData = rekapData.filter(row => {
+        const noPeserta = row[rekapHeaders.indexOf('Nomor Peserta')]?.toString().toLowerCase() || '';
+        const nama = row[rekapHeaders.indexOf('Nama Peserta')]?.toString().toLowerCase() || '';
+        return noPeserta.includes(searchTerm) || nama.includes(searchTerm);
+      });
+
+      // Pagination
+      const totalEntries = filteredRekapData.length;
+      const totalPages = rekapEntriesPerPage === 'all' ? 1 : Math.ceil(totalEntries / rekapEntriesPerPage);
+      rekapCurrentPage = Math.max(1, Math.min(rekapCurrentPage, totalPages));
+      
+      const start = rekapEntriesPerPage === 'all' ? 0 : (rekapCurrentPage - 1) * rekapEntriesPerPage;
+      const end = rekapEntriesPerPage === 'all' ? totalEntries : start + rekapEntriesPerPage;
+      const paginatedData = filteredRekapData.slice(start, end);
+
+      // Render header
+      const thead = document.getElementById('rekapTableHead');
+      thead.innerHTML = '';
+      if (rekapHeaders.length > 0) {
+        let headerHtml = '<tr>';
+        rekapHeaders.forEach(header => {
+          headerHtml += `<th>${header}</th>`;
+        });
+        headerHtml += '</tr>';
+        thead.innerHTML = headerHtml;
+      }
+
+      // Render table
+      const tbody = document.getElementById('rekapTableBody');
+      tbody.innerHTML = '';
+
+      if (paginatedData.length > 0) {
+        const noPesertaIndex = rekapHeaders.indexOf('Nomor Peserta');
+        const namaPesertaIndex = rekapHeaders.indexOf('Nama Peserta');
+        const pdfActionIndex = rekapHeaders.indexOf('PDF');
+
+        paginatedData.forEach(row => {
+          let rowHtml = '<tr>';
+          rowHtml += `<td>${row[noPesertaIndex] || ''}</td>`;
+          rowHtml += `<td>${row[namaPesertaIndex] || ''}</td>`;
+          rowHtml += `<td><button class="btn btn-sm btn-info" onclick="showLoading('Membuat PDF Lengkap...'); ${row[pdfActionIndex]}"><i class="fas fa-file-pdf"></i> Buat PDF Lengkap</button></td>`;
+          rowHtml += '</tr>';
+          tbody.innerHTML += rowHtml;
+        });
+      } else {
+        const colspan = rekapHeaders.length || 3;
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="empty-state"><i class="fas fa-search"></i><p>Tidak ada data yang cocok.</p></td></tr>`;
+      }
+
+      // Render pagination
+      renderRekapPagination(totalEntries, start, end, totalPages);
+    }
+
+    function renderRekapPagination(totalEntries, start, end, totalPages) {
+      const info = document.getElementById('rekapPaginationInfo');
+      const buttons = document.getElementById('rekapPaginationButtons');
+      
+      if (totalEntries > 0) {
+        info.textContent = `Menampilkan ${start + 1} sampai ${Math.min(end, totalEntries)} dari ${totalEntries} data`;
+      } else {
+        info.textContent = 'Tidak ada data';
+      }
+
+      buttons.innerHTML = '';
+      if (totalPages > 1) {
+        const prevButton = document.createElement('button');
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevButton.className = 'btn';
+        prevButton.disabled = rekapCurrentPage === 1;
+        prevButton.onclick = () => {
+          rekapCurrentPage--;
+          renderRekapTable();
+        };
+        buttons.appendChild(prevButton);
+
+        const nextButton = document.createElement('button');
+        nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextButton.className = 'btn';
+        nextButton.disabled = rekapCurrentPage === totalPages;
+        nextButton.onclick = () => {
+          rekapCurrentPage++;
+          renderRekapTable();
+        };
+        buttons.appendChild(nextButton);
+      }
+    }
+
+    function loadRekap() {
+      const tbody = document.getElementById('rekapTableBody');
+      const thead = document.getElementById('rekapTableHead');
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat data rekap...</p></td></tr>';
+      thead.innerHTML = '';
+      
+      const sessionId = sessionStorage.getItem('sessionId');
+      if (!sessionId) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Sesi tidak valid.</p></td></tr>';
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            rekapHeaders = response.headers;
+            rekapData = response.data;
+            rekapCurrentPage = 1; // Reset to first page
+            renderRekapTable();
+          } else {
+            showToast('Gagal memuat rekap: ' + response.message, 'error');
+            tbody.innerHTML = `<tr><td colspan="3" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${response.message}</p></td></tr>`;
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Gagal memuat rekap: ' + err.message, 'error');
+          tbody.innerHTML = `<tr><td colspan="3" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Terjadi kesalahan: ${err.message}</p></td></tr>`;
+        })
+        .getRekapData(sessionId);
+    }
+
+    document.getElementById('rekapSearchInput').addEventListener('input', () => {
+      rekapCurrentPage = 1;
+      renderRekapTable();
+    });
+    document.getElementById('rekapShowEntries').addEventListener('change', () => {
+      rekapCurrentPage = 1;
+      renderRekapTable();
+    });
+
+
+    function simpanNilaiEsai() {
+      const btn = document.getElementById('btnSimpanEsai');
+      const originalBtnHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner" style="width: 16px; height: 16px; margin-right: 8px;"></span>Menyimpan...';
+
+      const inputs = document.querySelectorAll('.essay-score-input');
+      const essayScores = [];
+      inputs.forEach(input => {
+        essayScores.push({
+          noPeserta: input.dataset.peserta,
+          skor: input.value
+        });
+      });
+
+      const sessionId = sessionStorage.getItem('sessionId');
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            showToast(response.message, 'success');
+            loadHasil(); // Refresh the table to show updated totals
+          } else {
+            showToast(response.message, 'error');
+          }
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+        })
+        .withFailureHandler(err => {
+          showToast('Gagal menyimpan: ' + err.message, 'error');
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+        })
+        .saveEssayScores(sessionId, essayScores);
+    }
+
+    function requestRetakeExam(noPeserta) {
+      Swal.fire({
+        title: 'Konfirmasi Ujian Ulang',
+        text: `Apakah Anda yakin ingin mengizinkan ujian ulang untuk peserta ${noPeserta}? Semua nilai dan riwayat jawaban sebelumnya akan dihapus.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Izinkan Ujian Ulang!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const sessionId = sessionStorage.getItem('sessionId');
+          Swal.fire({
+            title: 'Memproses...',
+            text: 'Sedang mengatur ulang data peserta.',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+          google.script.run
+            .withSuccessHandler(response => {
+              if (response.success) {
+                Swal.fire('Berhasil!', response.message, 'success');
+                loadHasil(); // Refresh table
+              } else {
+                Swal.fire('Gagal', response.message, 'error');
+              }
+            })
+            .withFailureHandler(err => {
+              Swal.fire('Error', err.message, 'error');
+            })
+            .retakeExam(sessionId, noPeserta);
+        }
+      });
+    }
+
+
+
+
+
+    let originalAdminUsername = ''; // Store original username
+
+    // Load Config
+    function loadConfig() {
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            const config = response.data;
+            originalAdminUsername = config.adminUsername || ''; // Store it
+            document.getElementById('currentPinText').textContent = config.pinSesi || 'Tidak diatur';
+            document.getElementById('pinSesi').value = ''; // Kosongkan input untuk PIN baru
+            document.getElementById('adminUsernameConfig').value = config.adminUsername || '';
+            document.getElementById('waktuUjian').value = config.waktuUjian || '30';
+            
+            // Handle login page settings
+            document.getElementById('loginTitle').value = config.loginTitle || '';
+            document.getElementById('loginSubtitle').value = config.loginSubtitle || '';
+            const logoPreview = document.getElementById('logoPreview');
+            if (config.logoUrl) {
+              logoPreview.src = config.logoUrl;
+              logoPreview.style.display = 'block';
+            } else {
+              logoPreview.style.display = 'none';
+            }
+          } else {
+            showToast('Gagal memuat konfigurasi: ' + response.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Gagal memuat konfigurasi: ' + err.message, 'error');
+        })
+        .getConfiguration();
+    }
+
+    // Modal Functions
+    function openAddPesertaModal() {
+      document.getElementById('modalAddPeserta').classList.add('active');
+    }
+
+    function openAddSoalModal() {
+      if (!currentMapel) {
+        showToast('Pilih mata pelajaran terlebih dahulu!', 'warning');
+        return;
+      }
+      // Reset form for adding
+      document.getElementById('formAddSoal').reset();
+      document.getElementById('originalNoSoal').value = '';
+      document.querySelector('#modalAddSoal .modal-title').textContent = 'Tambah Soal Baru';
+      const saveButton = document.querySelector('#modalAddSoal button.btn-primary');
+      saveButton.textContent = 'Simpan';
+      saveButton.setAttribute('onclick', 'addSoal()');
+      toggleOpsiSoal(); // Make sure options are visible/hidden correctly
+      document.getElementById('modalAddSoal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function toggleOpsiSoal() {
+      const tipe = document.getElementById('tipeSoalAdd').value;
+      const opsiDiv = document.getElementById('opsiPilihanGanda');
+      opsiDiv.style.display = tipe === 'Pilihan Ganda' ? 'block' : 'none';
+    }
+
+    // CRUD Functions
+    function addSoal() {
+      const sessionId = sessionStorage.getItem('sessionId');
+      const soalData = {
+        no: document.getElementById('noSoalAdd').value,
+        tipe: document.getElementById('tipeSoalAdd').value,
+        pertanyaan: document.getElementById('pertanyaanSoalAdd').value,
+        opsiA: document.getElementById('opsiA').value,
+        opsiB: document.getElementById('opsiB').value,
+        opsiC: document.getElementById('opsiC').value,
+        opsiD: document.getElementById('opsiD').value,
+        opsiE: document.getElementById('opsiE').value,
+        jawaban: document.getElementById('jawabanBenar').value
+      };
+
+      // Basic validation
+      if (!soalData.no || !soalData.pertanyaan) {
+        showToast('Nomor Soal dan Pertanyaan tidak boleh kosong.', 'warning');
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            showToast(response.message, 'success');
+            closeModal('modalAddSoal');
+            loadSoalByMapel();
+          } else {
+            showToast('Gagal menambah: ' + response.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Error: ' + err.message, 'error');
+        })
+        .addSoal(sessionId, currentMapel, soalData);
+    }
+    
+    function editSoal(no, mapel) {
+      const sessionId = sessionStorage.getItem('sessionId');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const loadingMessage = document.getElementById('loadingMessage');
+      loadingMessage.textContent = 'Memuat...'; // Set message for loading
+      loadingOverlay.style.display = 'flex'; // Show loading overlay
+
+      google.script.run
+        .withSuccessHandler(response => {
+          loadingOverlay.style.display = 'none'; // Hide loading overlay
+          if (response.success) {
+            const soal = response.data;
+            // Populate the modal
+            document.getElementById('originalNoSoal').value = soal.no;
+            document.getElementById('noSoalAdd').value = soal.no;
+            document.getElementById('tipeSoalAdd').value = soal.tipe;
+            document.getElementById('pertanyaanSoalAdd').value = soal.pertanyaan;
+            document.getElementById('opsiA').value = soal.opsiA;
+            document.getElementById('opsiB').value = soal.opsiB;
+            document.getElementById('opsiC').value = soal.opsiC;
+            document.getElementById('opsiD').value = soal.opsiD;
+            document.getElementById('opsiE').value = soal.opsiE;
+            document.getElementById('jawabanBenar').value = soal.jawaban;
+
+            // Change modal state to "Edit"
+            document.querySelector('#modalAddSoal .modal-title').textContent = 'Edit Soal No. ' + soal.no;
+            const saveButton = document.querySelector('#modalAddSoal button.btn-primary');
+            saveButton.textContent = 'Simpan Perubahan';
+            saveButton.setAttribute('onclick', 'updateSoal()');
+            
+            toggleOpsiSoal(); // Ensure correct options visibility
+            document.getElementById('modalAddSoal').classList.add('active');
+
+          } else {
+            showToast('Gagal mengambil detail soal: ' + response.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          loadingOverlay.style.display = 'none'; // Hide loading overlay
+          showToast('Error: ' + err.message, 'error');
+        })
+        .getSoalDetail(sessionId, mapel, no);
+    }
+
+    function updateSoal() {
+      const sessionId = sessionStorage.getItem('sessionId');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const loadingMessage = document.getElementById('loadingMessage');
+      loadingMessage.textContent = 'Menyimpan...'; // Set message for saving
+      loadingOverlay.style.display = 'flex'; // Show loading overlay
+
+      const soalData = {
+        originalNo: document.getElementById('originalNoSoal').value,
+        no: document.getElementById('noSoalAdd').value,
+        tipe: document.getElementById('tipeSoalAdd').value,
+        pertanyaan: document.getElementById('pertanyaanSoalAdd').value,
+        opsiA: document.getElementById('opsiA').value,
+        opsiB: document.getElementById('opsiB').value,
+        opsiC: document.getElementById('opsiC').value,
+        opsiD: document.getElementById('opsiD').value,
+        opsiE: document.getElementById('opsiE').value,
+        jawaban: document.getElementById('jawabanBenar').value
+      };
+
+      google.script.run
+        .withSuccessHandler(response => {
+          loadingOverlay.style.display = 'none'; // Hide loading overlay
+          if (response.success) {
+            showToast(response.message, 'success');
+            closeModal('modalAddSoal');
+            loadSoalByMapel();
+          } else {
+            showToast('Gagal memperbarui: ' + response.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          loadingOverlay.style.display = 'none'; // Hide loading overlay
+          showToast('Error: ' + err.message, 'error');
+        })
+        .updateSoal(sessionId, currentMapel, soalData);
+    }
+
+    function deleteSoal(no, mapel) {
+      Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: `Apakah Anda yakin ingin menghapus soal no. ${no} dari mata pelajaran ${mapel}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const sessionId = sessionStorage.getItem('sessionId');
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          const loadingMessage = document.getElementById('loadingMessage');
+          loadingMessage.textContent = 'Menghapus...'; // Set message for deleting
+          loadingOverlay.style.display = 'flex'; // Show loading overlay
+
+          google.script.run
+            .withSuccessHandler(response => {
+              loadingOverlay.style.display = 'none'; // Hide loading overlay
+              if (response.success) {
+                showToast(response.message, 'success');
+                loadSoalByMapel(); // Refresh the list
+              } else {
+                showToast(response.message, 'error');
+              }
+            })
+            .withFailureHandler(err => {
+              loadingOverlay.style.display = 'none'; // Hide loading overlay
+              showToast('Gagal menghapus: ' + err.message, 'error');
+            })
+            .deleteSoal(sessionId, mapel, no);
+        }
+      });
+    }
+
+    function addPeserta() {
+      const sessionId = sessionStorage.getItem('sessionId');
+      const pesertaData = {
+        noPeserta: document.getElementById('noPesertaAdd').value,
+        nama: document.getElementById('namaPesertaAdd').value,
+        password: document.getElementById('passwordPesertaAdd').value
+      };
+
+      if (!pesertaData.noPeserta || !pesertaData.nama || !pesertaData.password) {
+        showToast('Semua field harus diisi.', 'warning');
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            showToast(response.message, 'success');
+            closeModal('modalAddPeserta');
+            loadPeserta(); // Reload the list
+          } else {
+            showToast('Gagal menambah: ' + response.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          showToast('Error: ' + err.message, 'error');
+        })
+        .addPeserta(sessionId, pesertaData);
+    }
+
+    function openEditPesertaModal(noPeserta, nama, password, status) {
+      document.getElementById('originalNoPesertaEdit').value = noPeserta;
+      document.getElementById('noPesertaEdit').value = noPeserta;
+      document.getElementById('namaPesertaEdit').value = nama;
+      document.getElementById('passwordPesertaEdit').value = password;
+      document.getElementById('statusPesertaEdit').value = status; // Set the status
+      document.getElementById('modalEditPeserta').classList.add('active');
+    }
+
+    function editPeserta() {
+      const btn = document.getElementById('btnEditPeserta');
+      const originalBtnHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner" style="width: 16px; height: 16px; margin-right: 8px;"></span>Menyimpan...';
+
+      const sessionId = sessionStorage.getItem('sessionId');
+      const pesertaData = {
+        originalNoPeserta: document.getElementById('originalNoPesertaEdit').value,
+        noPeserta: document.getElementById('noPesertaEdit').value,
+        nama: document.getElementById('namaPesertaEdit').value,
+        password: document.getElementById('passwordPesertaEdit').value,
+        status: document.getElementById('statusPesertaEdit').value
+      };
+
+      if (!pesertaData.noPeserta || !pesertaData.nama || !pesertaData.password) {
+        showToast('Semua field harus diisi.', 'warning');
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            showToast(response.message, 'success');
+            closeModal('modalEditPeserta');
+            loadPeserta(); // Reload the list
+          } else {
+            showToast('Gagal mengedit: ' + response.message, 'error');
+          }
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+        })
+        .withFailureHandler(err => {
+          showToast('Error: ' + err.message, 'error');
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+        })
+        .updatePeserta(sessionId, pesertaData);
+    }
+
+    function deletePeserta(noPeserta) {
+      Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: `Apakah Anda yakin ingin menghapus peserta dengan nomor ${noPeserta}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const sessionId = sessionStorage.getItem('sessionId');
+          google.script.run
+            .withSuccessHandler(response => {
+              if (response.success) {
+                showToast(response.message, 'success');
+                loadPeserta(); // Reload the list
+              } else {
+                showToast('Gagal menghapus: ' + response.message, 'error');
+              }
+            })
+            .withFailureHandler(err => {
+              showToast('Error: ' + err.message, 'error');
+            })
+            .deletePeserta(sessionId, noPeserta);
+        }
+      });
+    }
+
+    // Save Config - General
+    function saveGeneralConfig() {
+      const pinSesi = document.getElementById('pinSesi').value;
+      const adminUsername = document.getElementById('adminUsernameConfig').value;
+      const adminPassword = document.getElementById('adminPasswordConfig').value;
+      const waktuUjian = document.getElementById('waktuUjian').value;
+
+      const letterAndNumberRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/;
+
+      if (pinSesi && !letterAndNumberRegex.test(pinSesi)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Input Tidak Valid',
+          text: 'PIN Sesi harus merupakan kombinasi huruf dan angka.'
+        });
+        return;
+      }
+
+      // Only validate username if it has changed
+      if (adminUsername && adminUsername !== originalAdminUsername && !letterAndNumberRegex.test(adminUsername)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Input Tidak Valid',
+          text: 'Username Admin harus merupakan kombinasi huruf dan angka.'
+        });
+        return;
+      }
+
+      if (adminPassword && !letterAndNumberRegex.test(adminPassword)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Input Tidak Valid',
+          text: 'Password Admin harus merupakan kombinasi huruf dan angka.'
+        });
+        return;
+      }
+
+      const sessionId = sessionStorage.getItem('sessionId');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const loadingMessage = document.getElementById('loadingMessage');
+      const btn = document.querySelector('#configForm button'); // Get the button
+      const originalBtnHtml = btn.innerHTML; // Save its content
+
+      const settings = {
+        pinSesi: pinSesi,
+        adminUsername: adminUsername,
+        adminPassword: adminPassword,
+        waktuUjian: waktuUjian
+      };
+
+      // Disable button and show loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner" style="width: 16px; height: 16px; margin-right: 8px;"></span>Menyimpan...';
+      loadingMessage.textContent = 'Menyimpan...'; // Set message for saving
+      loadingOverlay.style.display = 'flex';
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil!',
+              text: response.message,
+              showConfirmButton: false,
+              timer: 2000 // Auto close after 2 seconds
+            });
+            loadConfig(); // Reload to confirm
+          } else {
+            // Use Swal for server-side errors too for consistency
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal Menyimpan',
+              text: response.message
+            });
+          }
+          // Restore button state
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+          loadingOverlay.style.display = 'none';
+        })
+        .withFailureHandler(err => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Terjadi Kesalahan',
+            text: 'Gagal menyimpan: ' + err.message
+          });
+          // Restore button state
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+          loadingOverlay.style.display = 'none';
+        })
+        .saveGeneralSettings(sessionId, settings);
+    }
+
+    // Save Config - Login Page
+    function saveLoginConfig() {
+      const sessionId = sessionStorage.getItem('sessionId');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const loadingMessage = document.getElementById('loadingMessage');
+      const loginLogoInput = document.getElementById('loginLogoInput');
+      const btn = document.querySelector('#loginConfigForm button'); // Get the button
+      const originalBtnHtml = btn.innerHTML; // Save its content
+
+      const settings = {
+        loginTitle: document.getElementById('loginTitle').value,
+        loginSubtitle: document.getElementById('loginSubtitle').value,
+        logoData: null
+      };
+
+      // Disable button and show loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner" style="width: 16px; height: 16px; margin-right: 8px;"></span>Menyimpan...';
+      loadingMessage.textContent = 'Menyimpan...'; // Set message for saving
+      loadingOverlay.style.display = 'flex';
+
+      const handleResponse = (response) => {
+        if (response.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: response.message,
+            showConfirmButton: false,
+            timer: 2000
+          });
+          loadConfig();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menyimpan',
+            text: response.message
+          });
+        }
+        // Restore button state
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        loadingOverlay.style.display = 'none';
+      };
+
+      const handleError = (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Terjadi Kesalahan',
+          text: 'Gagal menyimpan: ' + err.message
+        });
+        // Restore button state
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        loadingOverlay.style.display = 'none';
+      };
+
+      if (loginLogoInput.files && loginLogoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          settings.logoData = e.target.result;
+          google.script.run
+            .withSuccessHandler(handleResponse)
+            .withFailureHandler(handleError)
+            .saveLoginSettings(sessionId, settings);
+        };
+        reader.readAsDataURL(loginLogoInput.files[0]);
+      } else {
+        google.script.run
+          .withSuccessHandler(handleResponse)
+          .withFailureHandler(handleError)
+          .saveLoginSettings(sessionId, settings);
+      }
+    }
+
+    function refreshHasil() {
+      loadHasil();
+    }
+
+
+
+    // Logout Buttons
+    document.getElementById('btnLogoutSidebar').addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      Swal.fire({
+        title: 'Konfirmasi Logout',
+        text: 'Apakah Anda yakin ingin keluar dari sesi ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Logout!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          logout();
+        }
+      });
+    });
+
+    document.getElementById('userMenu').addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      Swal.fire({
+        title: 'Konfirmasi Logout',
+        text: 'Apakah Anda yakin ingin keluar dari sesi ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Logout!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          logout();
+        }
+      });
+    });
+
+    // Initialize
+    validateAdminSession();
+    loadDashboardStats();
+  </script>
+</body>
+</html>
